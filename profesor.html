@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduManager Pro - Panel de Control</title>
+    <title>ERLC Staff Panel - Liberty County</title>
     <!-- Google Fonts & FontAwesome -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #0f172a;
-            --accent: #3b82f6;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --bg: #f8fafc;
+            --primary: #0f172a; /* Azul muy oscuro - Profesional */
+            --accent: #2563eb;  /* Azul Policía */
+            --success: #10b981; /* Verde - Aprobado/Activo */
+            --warning: #ef4444; /* Rojo - Infracción/Strike */
+            --bg: #f1f5f9;
             --card-bg: #ffffff;
             --border: #e2e8f0;
         }
@@ -29,13 +29,13 @@
 
         /* --- LOGIN --- */
         #login-overlay {
-            position: fixed; inset: 0; background: var(--primary);
+            position: fixed; inset: 0; background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
             display: flex; align-items: center; justify-content: center; z-index: 9999;
         }
         .login-box {
             background: white; padding: 40px; border-radius: 24px;
             width: 100%; max-width: 380px; text-align: center;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
         }
 
         #main-content-wrapper { display: none; width: 100%; }
@@ -46,7 +46,7 @@
             padding: 30px 20px; display: flex; flex-direction: column; gap: 20px;
             height: 100vh; position: fixed;
         }
-        .sidebar h1 { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 10px; margin-bottom: 30px; }
+        .sidebar h1 { font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 10px; margin-bottom: 30px; letter-spacing: 1px; }
         
         .main-content { margin-left: 260px; padding: 40px; width: calc(100% - 300px); }
 
@@ -59,16 +59,15 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid var(--border);
             margin-bottom: 20px;
         }
-        .card h3 { margin: 0 0 20px 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+        .card h3 { margin: 0 0 20px 0; font-size: 1rem; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px; }
 
         .form-group { margin-bottom: 20px; text-align: left; }
-        label { display: block; font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 8px; text-transform: uppercase; }
+        label { display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 8px; text-transform: uppercase; }
         
         input, textarea {
             width: 100%; padding: 12px 16px; border: 1px solid var(--border);
             border-radius: 12px; font-family: inherit; font-size: 0.95rem; box-sizing: border-box;
         }
-        input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
 
         .btn {
             width: 100%; padding: 14px; border-radius: 12px; border: none;
@@ -76,24 +75,20 @@
             display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         .btn-primary { background: var(--accent); color: white; }
-        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+        .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
 
-        /* --- EXAM CARDS --- */
-        .exam-card { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 15px; }
-        .exam-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .status-badge { padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; }
-        .status-pending { background: #fef3c7; color: #92400e; }
-        .status-graded { background: #dcfce7; color: #166534; }
-        .grade-controls { display: grid; grid-template-columns: 80px 1fr 50px; gap: 10px; padding-top: 15px; border-top: 1px solid #f1f5f9; }
+        /* --- LOGS / STRIKES --- */
+        .log-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 12px; }
+        .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+        .status-warn { background: #fee2e2; color: #991b1b; } /* Strike */
+        .status-pass { background: #dcfce7; color: #166534; } /* Ascenso/Aprobado */
 
         /* --- INTERACTION --- */
-        #chat-box { height: 250px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 10px; background: #fdfdfd; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 8px 12px; border-radius: 12px; max-width: 80%; font-size: 0.85rem; }
-        .msg-prof { align-self: flex-end; background: var(--accent); color: white; }
-        .msg-alum { align-self: flex-start; background: #f1f5f9; border: 1px solid var(--border); }
+        #chat-box { height: 280px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 10px; background: #ffffff; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px 14px; border-radius: 14px; max-width: 80%; font-size: 0.85rem; line-height: 1.4; }
+        .msg-prof { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 2px; }
+        .msg-alum { align-self: flex-start; background: #f1f5f9; color: var(--primary); border-bottom-left-radius: 2px; }
 
-        .alum-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
-        .btn-delete { color: #ef4444; cursor: pointer; }
         .hidden { display: none !important; }
 
         @media (max-width: 1000px) {
@@ -108,144 +103,162 @@
     <!-- LOGIN -->
     <div id="login-overlay">
         <div class="login-box">
-            <i class="fas fa-user-shield fa-3x" style="color: var(--accent); margin-bottom: 20px;"></i>
-            <h2>Panel Administrativo</h2>
+            <div style="background: var(--accent); width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                <i class="fas fa-shield-alt fa-2x" style="color: white;"></i>
+            </div>
+            <h2 style="margin-bottom: 5px;">ERLC Staff Central</h2>
+            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 25px;">Acceso restringido a Administradores</p>
             <div class="form-group">
-                <label>Usuario</label>
-                <input type="text" id="user_login" placeholder="Usuario">
+                <label>Usuario Staff</label>
+                <input type="text" id="user_login" placeholder="Ej: Admin_Juan">
             </div>
             <div class="form-group">
-                <label>Contraseña</label>
-                <input type="password" id="pass_login" placeholder="••••••••">
+                <label>Pin de Seguridad</label>
+                <input type="password" id="pass_login" placeholder="••••">
             </div>
-            <button class="btn btn-primary" onclick="verificarAcceso()">Entrar</button>
-            <p id="error-login" style="color: #ef4444; display: none; margin-top: 15px; font-size: 0.85rem;">Credenciales incorrectas</p>
+            <button class="btn btn-primary" onclick="verificarAcceso()">Verificar Identidad</button>
+            <p id="error-login" style="color: var(--warning); display: none; margin-top: 15px; font-size: 0.85rem; font-weight: 600;">Acceso Denegado</p>
         </div>
     </div>
 
     <div id="main-content-wrapper">
         <aside class="sidebar">
-            <h1><i class="fas fa-graduation-cap"></i> EduManager</h1>
-            <div style="margin-top: auto; font-size: 0.8rem; opacity: 0.6;">
-                <p><i class="fas fa-circle" style="color: var(--success); font-size: 0.6rem;"></i> Sesión: Profesor</p>
+            <h1><i class="fas fa-city"></i> LIBERTY COUNTY</h1>
+            <nav style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                <div style="padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.1); font-size: 0.9rem;"><i class="fas fa-tachometer-alt"></i> Dashboard</div>
+                <div style="padding: 10px; font-size: 0.9rem; opacity: 0.7;"><i class="fas fa-gavel"></i> Sanciones</div>
+                <div style="padding: 10px; font-size: 0.9rem; opacity: 0.7;"><i class="fas fa-file-invoice"></i> Formularios</div>
+            </nav>
+            <div style="margin-top: auto; font-size: 0.75rem; opacity: 0.6; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px;">
+                <p><i class="fas fa-signal" style="color: var(--success);"></i> Servidor: Operativo</p>
+                <p><i class="fas fa-clock"></i> 01/05/2026 - 21:48</p>
             </div>
         </aside>
 
         <main class="main-content">
             <header class="header-title">
                 <div>
-                    <h2>Panel del Instructor</h2>
-                    <p>Gestión de contenidos y seguimiento de alumnos.</p>
+                    <h2 style="margin:0;">Panel de Gestión Staff</h2>
+                    <p style="margin:5px 0 0; color: #64748b;">Control de usuarios y registros de actividad.</p>
                 </div>
-                <button class="btn" style="width: auto; background: #e2e8f0;" onclick="location.reload()">Cerrar Sesión</button>
             </header>
 
-            <!-- ANUNCIO GLOBAL -->
-            <div class="card" style="padding: 20px; border-left: 5px solid var(--warning);">
+            <!-- ANUNCIO GLOBAL DEL SERVIDOR -->
+            <div class="card" style="padding: 15px 25px; border-left: 5px solid var(--accent); background: #eff6ff;">
                 <div style="display: flex; gap: 15px; align-items: center;">
-                    <i class="fas fa-bullhorn fa-lg" style="color: var(--warning)"></i>
-                    <input type="text" id="global_announcement" placeholder="Anuncio general para todos..." style="border:none;">
-                    <button class="btn btn-primary" style="width: 120px; padding: 10px;" onclick="publicarAnuncio()">Publicar</button>
+                    <i class="fas fa-broadcast-tower" style="color: var(--accent)"></i>
+                    <input type="text" id="global_announcement" placeholder="Publicar noticia en el servidor (Ej: Reinicio en 5min)..." style="border:none; background:transparent; font-weight:600;">
+                    <button class="btn btn-primary" style="width: 140px; padding: 10px;" onclick="publicarAnuncio()">ANUNCIAR</button>
                 </div>
             </div>
 
             <div class="grid">
-                <!-- COLUMNA IZQUIERDA -->
+                <!-- ACCIONES RÁPIDAS -->
                 <div class="col-left">
                     <div class="card">
-                        <h3><i class="fas fa-paper-plane" style="color: var(--accent)"></i> Nueva Tarea</h3>
+                        <h3><i class="fas fa-user-plus" style="color: var(--accent)"></i> Registro de Staff</h3>
                         <div class="form-group">
-                            <label>ID Alumno</label>
-                            <input type="text" id="id_alumno" placeholder="ALUM-001">
+                            <label>Discord ID / User</label>
+                            <input type="text" id="id_alumno" placeholder="Nombre#0000">
                         </div>
                         <div class="form-group">
-                            <label>Nombre del Examen</label>
-                            <input type="text" id="titulo_examen" placeholder="Tema 1: Intro">
+                            <label>Acción / Reporte</label>
+                            <input type="text" id="titulo_examen" placeholder="Prueba de Rangos / Advertencia">
                         </div>
                         <div class="form-group">
-                            <label>Enlace Forms</label>
-                            <input type="url" id="url_examen" placeholder="https://forms.gle/...">
+                            <label>Enlace de Prueba/Clip</label>
+                            <input type="url" id="url_examen" placeholder="Medal.tv / YouTube">
                         </div>
-                        <button class="btn btn-primary" onclick="crearExamen()">Asignar Examen</button>
-                        <div id="notif" style="display:none; margin-top:15px; text-align:center; color: var(--success);">¡Asignado!</div>
+                        <button class="btn btn-primary" onclick="crearExamen()">Subir Registro</button>
+                        <div id="notif" style="display:none; margin-top:15px; text-align:center; color: var(--success); font-weight:700;">¡Registro Guardado!</div>
                     </div>
 
-                    <!-- CUENTA ATRÁS -->
-                    <div class="card" style="background: var(--primary); color: white; border: none;">
-                        <h3 style="color: #94a3b8; font-size: 0.8rem;"><i class="fas fa-stopwatch"></i> TIEMPO A EXAMEN</h3>
-                        <div style="display: flex; justify-content: space-around; text-align: center; margin-top: 10px;">
-                            <div><div id="days-left" style="font-size: 1.8rem; font-weight: 800; color: var(--accent);">--</div><small>DÍAS</small></div>
-                            <div><div id="hours-left" style="font-size: 1.8rem; font-weight: 800;">--</div><small>HORAS</small></div>
+                    <div class="card" style="background: #1e293b; color: white;">
+                        <h3 style="color: #94a3b8; font-size: 0.7rem;"><i class="fas fa-history"></i> PRÓXIMA SESIÓN / SSU</h3>
+                        <div style="font-size: 1.5rem; font-weight: 800; text-align: center; margin: 10px 0;">
+                            <span id="days-left">--</span>d : <span id="hours-left">--</span>h
                         </div>
                     </div>
                 </div>
 
-                <!-- COLUMNA DERECHA -->
+                <!-- BASE DE DATOS DE USUARIOS -->
                 <div class="col-right">
                     <div class="card">
-                        <h3><i class="fas fa-clipboard-check" style="color: var(--warning)"></i> Centro de Calificaciones</h3>
+                        <h3><i class="fas fa-search" style="color: var(--accent)"></i> Base de Datos de Staff/User</h3>
                         <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                            <input type="text" id="search_id" placeholder="Buscar ID Alumno..." onkeyup="if(event.key==='Enter') buscarAlumno()">
-                            <button class="btn btn-primary" style="width: 120px;" onclick="buscarAlumno()">Buscar</button>
+                            <input type="text" id="search_id" placeholder="ID del Usuario o Discord..." onkeyup="if(event.key==='Enter') buscarAlumno()">
+                            <button class="btn btn-primary" style="width: 120px;" onclick="buscarAlumno()"><i class="fas fa-search"></i></button>
                         </div>
                         
                         <div id="stats-container" class="hidden">
-                            <div style="display: flex; justify-content: space-around; background: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border);">
-                                <div style="text-align:center;"><small>Promedio</small><div id="avg-grade" style="font-weight:800; color:var(--accent);">0.0</div></div>
-                                <div style="text-align:center;"><small>Tareas</small><div id="total-tasks" style="font-weight:800;">0</div></div>
-                                <div style="width: 40%; align-self:center;"><div style="height:8px; background:#e2e8f0; border-radius:4px; overflow:hidden;"><div id="progress-bar" style="height:100%; background:var(--success); width:0%;"></div></div></div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                                <div style="background:#f8fafc; padding:15px; border-radius:12px; text-align:center; border:1px solid var(--border);">
+                                    <small style="color:#64748b; font-weight:700;">PUNTUACIÓN</small>
+                                    <div id="avg-grade" style="font-size:1.4rem; font-weight:800; color:var(--accent);">0.0</div>
+                                </div>
+                                <div style="background:#f8fafc; padding:15px; border-radius:12px; text-align:center; border:1px solid var(--border);">
+                                    <small style="color:#64748b; font-weight:700;">REPORTES</small>
+                                    <div id="total-tasks" style="font-size:1.4rem; font-weight:800;">0</div>
+                                </div>
+                                <div style="background:#f8fafc; padding:15px; border-radius:12px; text-align:center; border:1px solid var(--border);">
+                                    <small style="color:#64748b; font-weight:700;">ESTADO STAFF</small>
+                                    <div style="color:var(--success); font-weight:800; font-size:1rem; margin-top:5px;">ACTIVO</div>
+                                </div>
                             </div>
                         </div>
                         <div id="contenedorExamenes"></div>
                     </div>
 
-                    <!-- TABS INTERACCIÓN -->
+                    <!-- COMUNICACIÓN DIRECTA -->
                     <div class="card" id="panel-interaccion" style="display: none;">
-                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                            <button class="btn" onclick="switchTab('chat')" id="btn-tab-chat" style="background: var(--accent); color: white;">Chat</button>
-                            <button class="btn" onclick="switchTab('plan')" id="btn-tab-plan" style="background: #e2e8f0;">Planificación</button>
-                            <button class="btn" onclick="switchTab('links')" id="btn-tab-links" style="background: #e2e8f0;">Material</button>
+                        <div style="display: flex; gap: 5px; margin-bottom: 20px; background: #f1f5f9; padding: 5px; border-radius: 12px;">
+                            <button class="btn" onclick="switchTab('chat')" id="btn-tab-chat" style="background: var(--accent); color: white;">Chat Privado</button>
+                            <button class="btn" onclick="switchTab('plan')" id="btn-tab-plan" style="background: transparent;">Hoja de Ruta</button>
+                            <button class="btn" onclick="switchTab('links')" id="btn-tab-links" style="background: transparent;">Documentación</button>
                         </div>
 
                         <div id="tab-chat">
                             <div id="chat-box"></div>
                             <div style="display: flex; gap: 8px;">
-                                <input type="text" id="chat_input" placeholder="Escribe al alumno...">
+                                <input type="text" id="chat_input" placeholder="Enviar mensaje al Staff...">
                                 <button class="btn btn-primary" style="width: 60px;" onclick="enviarMensaje()"><i class="fas fa-paper-plane"></i></button>
                             </div>
                         </div>
 
                         <div id="tab-plan" style="display: none;">
-                            <textarea id="plan_text" rows="5" placeholder="Objetivos semanales..."></textarea>
-                            <button class="btn btn-primary" onclick="guardarPlanificacion()" style="margin-top:10px;">Actualizar Plan</button>
-                            <div id="plan-status" style="margin-top:10px; font-size:0.8rem; color:var(--success); display:none;">¡Actualizado!</div>
+                            <label>Objetivos y Tareas asignadas</label>
+                            <textarea id="plan_text" rows="5" placeholder="1. Vigilancia en Spawn&#10;2. Revisión de tickets..."></textarea>
+                            <button class="btn btn-primary" onclick="guardarPlanificacion()" style="margin-top:10px;">Actualizar Objetivos</button>
                         </div>
 
                         <div id="tab-links" style="display: none;">
-                            <input type="text" id="link_name" placeholder="Nombre del recurso" style="margin-bottom:10px;">
-                            <input type="url" id="link_url" placeholder="https://..." style="margin-bottom:10px;">
-                            <button class="btn btn-primary" onclick="guardarEnlace()">Compartir Link</button>
+                            <div class="form-group">
+                                <label>Nuevo Documento (Reglas/Guías)</label>
+                                <input type="text" id="link_name" placeholder="Título del Documento" style="margin-bottom:8px;">
+                                <input type="url" id="link_url" placeholder="URL de Google Docs / PDF">
+                            </div>
+                            <button class="btn btn-primary" onclick="guardarEnlace()">Añadir a Biblioteca</button>
                             <div id="lista-enlaces" style="margin-top:15px;"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- GESTIÓN ALUMNOS -->
+            <!-- GESTIÓN DE MIEMBROS -->
             <div class="card" style="margin-top: 30px;">
-                <h3><i class="fas fa-users" style="color: var(--accent)"></i> Gestión de la Clase</h3>
+                <h3><i class="fas fa-users-cog" style="color: var(--accent)"></i> Listado Oficial de Miembros</h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
                     <div>
-                        <label>Nuevo Alumno</label>
+                        <label>Alta de nuevo Miembro</label>
                         <div style="display: flex; gap: 10px; margin-top: 10px;">
-                            <input type="text" id="new_alum_name" placeholder="Nombre completo">
-                            <input type="text" id="new_alum_id" placeholder="ID">
-                            <button class="btn btn-primary" style="width: 60px;" onclick="registrarAlumno()"><i class="fas fa-user-plus"></i></button>
+                            <input type="text" id="new_alum_name" placeholder="Nombre Roleplay">
+                            <input type="text" id="new_alum_id" placeholder="Discord ID">
+                            <button class="btn btn-primary" style="width: 60px;" onclick="registrarAlumno()"><i class="fas fa-plus"></i></button>
                         </div>
                     </div>
                     <div>
-                        <label>Alumnos Activos</label>
-                        <div id="lista-alumnos-registrados" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; margin-top: 10px;"></div>
+                        <label>Staff Registrado</label>
+                        <div id="lista-alumnos-registrados" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; margin-top: 10px; background: #fafafa;"></div>
                     </div>
                 </div>
             </div>
@@ -256,6 +269,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, push, update, onValue, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // CONFIGURACIÓN DE TU FIREBASE (Misma base de datos, solo cambiamos los textos de la UI)
         const firebaseConfig = {
             apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
             authDomain: "examenes-profesoralumno.firebaseapp.com",
@@ -270,7 +284,7 @@
         const db = getDatabase(app);
         let alumnoActivo = null;
 
-        // LOGIN
+        // LOGIN - Cambia esto en tu Firebase config/admin si quieres otro usuario
         window.verificarAcceso = async () => {
             const u = document.getElementById('user_login').value.trim();
             const p = document.getElementById('pass_login').value.trim();
@@ -281,16 +295,16 @@
             } else { document.getElementById('error-login').style.display = 'block'; }
         };
 
-        // CUENTA ATRÁS
+        // CONTADOR SSU
         function actualizarReloj() {
-            const target = new Date("April 2, 2026 16:50:00").getTime();
+            const target = new Date("April 2, 2026 16:50:00").getTime(); // Cambia esta fecha para el próximo evento
             const diff = target - new Date().getTime();
             document.getElementById("days-left").innerText = Math.floor(diff / (1000*60*60*24));
             document.getElementById("hours-left").innerText = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
         }
         setInterval(actualizarReloj, 60000); actualizarReloj();
 
-        // BÚSQUEDA Y CALIFICACIONES
+        // BÚSQUEDA DE USUARIOS
         window.buscarAlumno = () => {
             const id = document.getElementById('search_id').value.trim();
             if(!id) return;
@@ -308,18 +322,20 @@
                 let suma = 0, cont = 0;
                 Object.entries(data).forEach(([key, ex]) => {
                     if(ex.nota) { suma += parseFloat(ex.nota); cont++; }
-                    container.innerHTML += `<div class="exam-card">
-                        <div class="exam-info"><h4>${ex.titulo}</h4><span class="status-badge ${ex.nota ? 'status-graded':'status-pending'}">${ex.nota ? 'Nota: '+ex.nota : 'Pendiente'}</span></div>
-                        <div class="grade-controls">
-                            <input type="number" class="input-grade" id="n_${key}" value="${ex.nota || ''}">
-                            <input type="text" id="c_${key}" value="${ex.comentario || ''}" placeholder="Feedback">
-                            <button class="btn btn-primary" onclick="guardarNota('${id}','${key}')"><i class="fas fa-save"></i></button>
+                    container.innerHTML += `<div class="log-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <strong style="color:var(--primary);">${ex.titulo}</strong>
+                            <span class="status-badge ${parseFloat(ex.nota) < 5 ? 'status-warn' : 'status-pass'}">${ex.nota ? 'Puntos: '+ex.nota : 'Evaluando'}</span>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 80px 1fr 50px; gap:10px;">
+                            <input type="number" id="n_${key}" value="${ex.nota || ''}" placeholder="Pts">
+                            <input type="text" id="c_${key}" value="${ex.comentario || ''}" placeholder="Nota interna...">
+                            <button class="btn btn-primary" style="padding:5px;" onclick="guardarNota('${id}','${key}')"><i class="fas fa-save"></i></button>
                         </div></div>`;
                 });
                 const prom = cont > 0 ? (suma/cont).toFixed(1) : 0;
                 document.getElementById('avg-grade').innerText = prom;
                 document.getElementById('total-tasks').innerText = Object.keys(data).length;
-                document.getElementById('progress-bar').style.width = (prom * 10) + "%";
             });
         };
 
@@ -328,10 +344,10 @@
                 nota: document.getElementById(`n_${e}`).value, 
                 comentario: document.getElementById(`c_${e}`).value 
             });
-            alert("Nota actualizada");
+            alert("Registro actualizado en la base de datos.");
         };
 
-        // GESTIÓN ALUMNOS
+        // GESTIÓN STAFF
         window.registrarAlumno = async () => {
             const n = document.getElementById('new_alum_name').value;
             const id = document.getElementById('new_alum_id').value;
@@ -342,21 +358,25 @@
             const list = document.getElementById('lista-alumnos-registrados');
             list.innerHTML = "";
             if(snap.exists()) Object.entries(snap.val()).forEach(([id, info]) => {
-                list.innerHTML += `<div class="alum-item"><span>${id} - ${info.nombre}</span><i class="fas fa-trash btn-delete" onclick="eliminarAlumno('${id}')"></i></div>`;
+                list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.85rem;">
+                    <span><strong>${info.nombre}</strong> <br><small style="color:#64748b;">${id}</small></span>
+                    <i class="fas fa-user-minus" style="color:#ef4444; cursor:pointer;" onclick="eliminarAlumno('${id}')"></i>
+                </div>`;
             });
         });
 
-        window.eliminarAlumno = async (id) => { if(confirm("¿Borrar?")) await remove(ref(db, 'estudiantes_registrados/'+id)); };
+        window.eliminarAlumno = async (id) => { if(confirm("¿Retirar del Staff?")) await remove(ref(db, 'estudiantes_registrados/'+id)); };
 
-        // TABS Y CHAT
+        // NAVEGACIÓN TABS
         window.switchTab = (tab) => {
             ['chat', 'links', 'plan'].forEach(t => {
                 document.getElementById(`tab-${t}`).style.display = t === tab ? 'block' : 'none';
-                document.getElementById(`btn-tab-${t}`).style.background = t === tab ? 'var(--accent)' : '#e2e8f0';
+                document.getElementById(`btn-tab-${t}`).style.background = t === tab ? 'var(--accent)' : 'transparent';
                 document.getElementById(`btn-tab-${t}`).style.color = t === tab ? 'white' : 'var(--primary)';
             });
         };
 
+        // CHAT STAFF
         function cargarChat(id) {
             onValue(ref(db, 'chats/' + id), (snap) => {
                 const box = document.getElementById('chat-box'); box.innerHTML = "";
@@ -375,8 +395,8 @@
             }
         };
 
-        // OTROS
-        window.publicarAnuncio = async () => { await set(ref(db, 'config/anuncio_global'), { texto: document.getElementById('global_announcement').value }); alert("Anuncio publicado"); };
+        // ANUNCIOS Y PLANES
+        window.publicarAnuncio = async () => { await set(ref(db, 'config/anuncio_global'), { texto: document.getElementById('global_announcement').value }); alert("Anuncio enviado al servidor."); };
         
         window.crearExamen = async () => {
             const id = document.getElementById('id_alumno').value;
@@ -385,11 +405,12 @@
                 url: document.getElementById('url_examen').value 
             });
             document.getElementById('notif').style.display='block';
+            setTimeout(() => document.getElementById('notif').style.display='none', 3000);
         };
 
         window.guardarPlanificacion = async () => {
             await set(ref(db, 'planificacion/' + alumnoActivo), { objetivos: document.getElementById('plan_text').value });
-            document.getElementById('plan-status').style.display='block';
+            alert("Hoja de ruta actualizada.");
         };
 
         async function cargarPlanificacion(id) {
@@ -408,7 +429,10 @@
             onValue(ref(db, 'recursos/' + id), (snap) => {
                 const list = document.getElementById('lista-enlaces'); list.innerHTML = "";
                 if(snap.exists()) Object.values(snap.val()).forEach(i => {
-                    list.innerHTML += `<div style="background:#f1f5f9; padding:10px; border-radius:8px; margin-bottom:5px; display:flex; justify-content:space-between;"><span>${i.nombre}</span><a href="${i.url}" target="_blank">Ver</a></div>`;
+                    list.innerHTML += `<div style="background:#f1f5f9; padding:10px; border-radius:8px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center; font-size:0.8rem;">
+                        <span><i class="fas fa-file-alt"></i> ${i.nombre}</span>
+                        <a href="${i.url}" target="_blank" style="color:var(--accent); text-decoration:none; font-weight:700;">ABRIR</a>
+                    </div>`;
                 });
             });
         }
