@@ -3,236 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.E.O. - Sistema de Evaluación de Oposiciones</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>S.I.G.E. - Sistema Integrado de Gestión Estatal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #020617; /* Slate 950 - Máxima seriedad */
-            --accent: #1e40af;  /* Azul Federal */
-            --success: #059669; /* Verde Apto */
-            --warning: #dc2626; /* Rojo No Apto */
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --border: #cbd5e1;
+            --bg-deep: #05070a;
+            --bg-card: #0f121a;
+            --border: #1e293b;
+            --accent-cnp: #1e40af; /* Azul Policía */
+            --accent-gc: #064e3b;  /* Verde Guardia Civil */
+            --accent-fire: #991b1b; /* Rojo Bomberos */
+            --accent-ems: #0891b2;  /* Cyan Sanitarios */
+            --accent-dgt: #854d0e;  /* Ambar DGT */
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
         }
 
         body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: var(--bg); 
-            color: var(--primary); 
-            margin: 0; 
-            display: flex;
-            min-height: 100vh;
+            font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-deep); color: var(--text-main);
+            margin: 0; display: flex; height: 100vh; overflow: hidden;
         }
+
+        /* --- NAVEGACIÓN --- */
+        .sidebar {
+            width: 260px; background: #000; border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; padding: 20px;
+        }
+        .logo-area { padding: 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+        .logo-area h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: -1px; }
+        .dept-btn {
+            display: flex; align-items: center; gap: 12px; padding: 12px;
+            border-radius: 8px; cursor: pointer; transition: 0.2s; margin-bottom: 5px;
+            font-weight: 600; font-size: 0.85rem; color: var(--text-dim);
+        }
+        .dept-btn:hover { background: rgba(255,255,255,0.05); color: white; }
+        .dept-btn.active { background: white; color: black; }
+
+        /* --- DASHBOARD --- */
+        .main-view { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .top-nav {
+            padding: 15px 40px; background: rgba(5, 7, 10, 0.8); backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 10;
+        }
+
+        .container { padding: 40px; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .grid { display: grid; grid-template-columns: 350px 1fr; gap: 30px; }
+
+        /* --- COMPONENTES --- */
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 25px; }
+        .card h3 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 20px; }
+
+        input, select, textarea {
+            width: 100%; background: #000; border: 1px solid var(--border); border-radius: 6px;
+            padding: 10px; color: white; font-size: 0.9rem; margin-bottom: 10px; box-sizing: border-box;
+        }
+        .btn {
+            background: white; color: black; border: none; padding: 12px; border-radius: 6px;
+            font-weight: 800; cursor: pointer; width: 100%; font-size: 0.75rem; text-transform: uppercase;
+        }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* --- EXPEDIENTE --- */
+        .exam-row {
+            background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin-bottom: 10px;
+            border-left: 4px solid var(--border); position: relative;
+        }
+        .tag-apto { border-left-color: #10b981; }
+        .tag-noapto { border-left-color: #ef4444; }
+
+        .badge-dept { padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; font-weight: 800; }
 
         /* --- LOGIN --- */
         #login-overlay {
-            position: fixed; inset: 0; background: linear-gradient(135deg, #020617 0%, #1e1b4b 100%);
-            display: flex; align-items: center; justify-content: center; z-index: 9999;
+            position: fixed; inset: 0; background: black; z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
         }
-        .login-box {
-            background: white; padding: 40px; border-radius: 12px;
-            width: 100%; max-width: 400px; text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
-            border-top: 5px solid var(--accent);
-        }
-
-        #main-content-wrapper { display: none; width: 100%; }
-
-        /* --- SIDEBAR --- */
-        .sidebar {
-            width: 280px; background: var(--primary); color: white;
-            padding: 30px 20px; display: flex; flex-direction: column; gap: 20px;
-            height: 100vh; position: fixed; border-right: 1px solid #1e293b;
-        }
-        .sidebar h1 { font-size: 1rem; font-weight: 800; display: flex; align-items: center; gap: 10px; margin-bottom: 40px; letter-spacing: 2px; color: #94a3b8; }
-        
-        .main-content { margin-left: 280px; padding: 40px; width: calc(100% - 320px); }
-
-        /* --- UI COMPONENTS --- */
-        .card {
-            background: var(--card-bg); border-radius: 8px; padding: 25px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border);
-            margin-bottom: 20px;
-        }
-        .card h3 { margin: 0 0 20px 0; font-size: 0.9rem; font-weight: 800; color: var(--accent); text-transform: uppercase; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
-
-        .btn {
-            width: 100%; padding: 12px; border-radius: 6px; border: none;
-            font-weight: 700; cursor: pointer; transition: 0.2s;
-            text-transform: uppercase; font-size: 0.75rem;
-        }
-        .btn-primary { background: var(--accent); color: white; }
-        .btn-primary:hover { background: #1e3a8a; }
-
-        /* --- CANDIDATE CARDS --- */
-        .phase-card { 
-            background: #ffffff; border-left: 4px solid var(--border); 
-            padding: 15px; margin-bottom: 10px; border-radius: 4px;
-            display: grid; grid-template-columns: 1fr auto; gap: 15px;
-        }
-        .phase-card.apto { border-left-color: var(--success); }
-        .phase-card.no-apto { border-left-color: var(--warning); }
-
-        .grade-input { 
-            display: flex; gap: 10px; align-items: center; margin-top: 10px;
-            background: #f8fafc; padding: 10px; border-radius: 6px;
-        }
-
-        #chat-box { height: 300px; overflow-y: auto; border: 1px solid var(--border); padding: 15px; background: #f1f5f9; border-radius: 8px; }
-        .msg { padding: 10px; border-radius: 4px; margin-bottom: 8px; font-size: 0.85rem; max-width: 85%; }
-        .msg-prof { background: var(--accent); color: white; margin-left: auto; }
-        .msg-alum { background: white; border: 1px solid var(--border); }
-
-        input, select, textarea {
-            width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem;
-        }
-
-        .badge { font-size: 0.65rem; padding: 3px 8px; border-radius: 4px; font-weight: 800; }
-        .badge-waiting { background: #fef3c7; color: #92400e; }
     </style>
 </head>
 <body>
 
-    <!-- LOGIN -->
+    <!-- PANTALLA DE ACCESO -->
     <div id="login-overlay">
-        <div class="login-box">
-            <img src="https://cdn-icons-png.flaticon.com/512/747/747062.png" width="80" style="margin-bottom: 20px; filter: grayscale(1);">
-            <h2 style="letter-spacing: -1px;">DEPARTAMENTO DE RECLUTAMIENTO</h2>
-            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 30px;">ACCESO EXCLUSIVO PARA EXAMINADORES Y ALTO CARGO</p>
-            <input type="text" id="user_login" placeholder="Identificación del Examinador" style="margin-bottom: 15px;">
-            <input type="password" id="pass_login" placeholder="Clave de Encriptación" style="margin-bottom: 20px;">
-            <button class="btn btn-primary" onclick="verificarAcceso()">Acceder al Sistema</button>
-            <p id="error-login" style="color: var(--warning); display: none; margin-top: 15px; font-size: 0.8rem;">Credenciales Inválidas</p>
+        <div class="card" style="width: 320px; text-align: center;">
+            <i class="fas fa-lock" style="font-size: 2rem; margin-bottom: 20px;"></i>
+            <h3>Control de Acceso Gubernamental</h3>
+            <input type="text" id="user_login" placeholder="ID de Funcionario">
+            <input type="password" id="pass_login" placeholder="Clave de Encriptación">
+            <button class="btn" onclick="verificarAcceso()">Validar Credenciales</button>
         </div>
     </div>
 
-    <div id="main-content-wrapper">
-        <aside class="sidebar">
-            <h1><i class="fas fa-balance-scale"></i> S.E.O. FEDERAL</h1>
-            <div style="font-size: 0.8rem;">
-                <p style="color: #64748b; font-weight: 800; margin-bottom: 10px;">ESTADO DE CONVOCATORIA</p>
-                <div style="background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 10px; border-radius: 6px; text-align: center;">
-                    ABIERTA <i class="fas fa-check-circle"></i>
-                </div>
-            </div>
-            <div style="margin-top: auto; border-top: 1px solid #1e293b; pt-20">
-                <p style="font-size: 0.7rem; color: #94a3b8;">SISTEMA V3.0<br>LIBERTY COUNTY DISTRICT</p>
-            </div>
-        </aside>
+    <!-- SIDEBAR DE DEPARTAMENTOS -->
+    <aside class="sidebar">
+        <div class="logo-area">
+            <h1>S.I.G.E. <span style="color: #64748b;">3.0</span></h1>
+            <small style="color: #475569; font-size: 0.6rem;">GOBIERNO DE ESPAÑA - ERLC</small>
+        </div>
+        
+        <div class="dept-btn" onclick="filterDept('CNP')"><i class="fas fa-shield-alt" style="color: var(--accent-cnp)"></i> CNP (Policía)</div>
+        <div class="dept-btn" onclick="filterDept('GC')"><i class="fas fa-bullseye" style="color: var(--accent-gc)"></i> Guardia Civil</div>
+        <div class="dept-btn" onclick="filterDept('BOMBEROS')"><i class="fas fa-fire-extinguisher" style="color: var(--accent-fire)"></i> Bomberos</div>
+        <div class="dept-btn" onclick="filterDept('SANITARIOS')"><i class="fas fa-heartbeat" style="color: var(--accent-ems)"></i> Sanitarios</div>
+        <div class="dept-btn" onclick="filterDept('DGT')"><i class="fas fa-car" style="color: var(--accent-dgt)"></i> DGT (Tráfico)</div>
 
-        <main class="main-content">
-            <header style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center;">
-                <h2 style="font-weight: 800; font-size: 1.5rem;">GESTIÓN DE OPOSITORES</h2>
-                <button class="btn" style="width: auto; background: #f1f5f9; color: #475569;" onclick="location.reload()">Cerrar Sistema</button>
-            </header>
+        <div style="margin-top: auto; padding: 10px; font-size: 0.7rem; color: #334155;">
+            <i class="fas fa-clock"></i> 22:01 | Valladolid, España
+        </div>
+    </aside>
 
-            <div style="display: grid; grid-template-columns: 320px 1fr; gap: 30px;">
+    <div class="main-view">
+        <nav class="top-nav">
+            <div id="active-dept-title" style="font-weight: 800; text-transform: uppercase;">Portal de Oposiciones Global</div>
+            <div style="display: flex; gap: 15px;">
+                <input type="text" id="search_id" placeholder="Buscar DNI / Discord..." style="width: 250px; margin:0;">
+                <button class="btn" style="width: auto;" onclick="buscarAlumno()">CARGAR EXPEDIENTE</button>
+            </div>
+        </nav>
+
+        <div class="container">
+            <div class="grid">
                 
-                <!-- COLUMNA ACCIONES -->
-                <div>
+                <!-- GESTIÓN -->
+                <div class="left-col">
                     <div class="card">
-                        <h3><i class="fas fa-user-plus"></i> Abrir Expediente</h3>
-                        <div style="display: flex; flex-direction: column; gap: 15px;">
-                            <input type="text" id="id_alumno" placeholder="Nombre de Usuario / Discord">
-                            <input type="text" id="titulo_examen" placeholder="Fase (Ej: Teórico / Psicofísico)">
-                            <input type="url" id="url_examen" placeholder="Link al Examen Respondido">
-                            <button class="btn btn-primary" onclick="crearExamen()">Asignar Fase</button>
-                        </div>
+                        <h3><i class="fas fa-folder-plus"></i> Nueva Prueba</h3>
+                        <label style="font-size: 0.7rem; color: #475569;">DEPARTAMENTO</label>
+                        <select id="reg_dept">
+                            <option value="CNP">CNP</option>
+                            <option value="GC">Guardia Civil</option>
+                            <option value="BOMBEROS">Bomberos</option>
+                            <option value="SANITARIOS">Sanitarios</option>
+                            <option value="DGT">DGT</option>
+                        </select>
+                        <input type="text" id="id_alumno" placeholder="Nombre Aspirante">
+                        <input type="text" id="titulo_examen" placeholder="Tipo de Examen (Teórico/Práctico)">
+                        <input type="url" id="url_examen" placeholder="Link a Evidencia">
+                        <button class="btn" onclick="crearExamen()" style="background: var(--accent-cnp); color: white;">ASIGNAR AL SISTEMA</button>
                     </div>
 
-                    <div class="card" style="background: var(--primary); color: white;">
-                        <h3 style="color: #94a3b8; border: none;">Cierre de Oposiciones</h3>
-                        <div style="text-align: center; padding: 10px;">
-                            <div id="days-left" style="font-size: 2rem; font-weight: 800;">--</div>
-                            <small>DÍAS RESTANTES</small>
+                    <div class="card">
+                        <h3><i class="fas fa-users-cog"></i> Censo Estatal</h3>
+                        <div style="display: flex; gap: 5px;">
+                            <input type="text" id="new_alum_name" placeholder="Nombre">
+                            <input type="text" id="new_alum_id" placeholder="ID" style="width: 60px;">
+                            <button class="btn" style="width: 40px;" onclick="registrarAlumno()"><i class="fas fa-plus"></i></button>
                         </div>
+                        <div id="lista-alumnos-registrados" style="max-height: 200px; overflow-y: auto; margin-top: 15px;"></div>
                     </div>
                 </div>
 
-                <!-- COLUMNA EVALUACIÓN -->
-                <div>
+                <!-- EXPEDIENTE CENTRAL -->
+                <div class="right-col">
                     <div class="card">
-                        <h3><i class="fas fa-file-signature"></i> Calificación de Pruebas</h3>
-                        <div style="display: flex; gap: 10px; margin-bottom: 25px;">
-                            <input type="text" id="search_id" placeholder="Buscar Aspirante por Discord/ID...">
-                            <button class="btn btn-primary" style="width: 100px;" onclick="buscarAlumno()"><i class="fas fa-search"></i></button>
-                        </div>
-
-                        <div id="stats-container" class="hidden" style="margin-bottom: 20px;">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                <div style="background: #f8fafc; padding: 15px; border-radius: 4px; border: 1px solid var(--border);">
-                                    <small>MEDIA ACTUAL</small>
-                                    <div id="avg-grade" style="font-size: 1.5rem; font-weight: 800;">0.0</div>
-                                </div>
-                                <div style="background: #f8fafc; padding: 15px; border-radius: 4px; border: 1px solid var(--border);">
-                                    <small>PRUEBAS COMPLETADAS</small>
-                                    <div id="total-tasks" style="font-size: 1.5rem; font-weight: 800;">0</div>
-                                </div>
+                        <h3><i class="fas fa-file-medical"></i> Registro de Calificaciones</h3>
+                        <div id="stats-area" style="display: none; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div style="background: #000; padding: 15px; border-radius: 8px;">
+                                <small>PROMEDIO DE OPOSICIÓN</small>
+                                <div id="avg-grade" style="font-size: 1.8rem; font-weight: 800;">--</div>
+                            </div>
+                            <div style="background: #000; padding: 15px; border-radius: 8px;">
+                                <small>PRUEBAS SUPERADAS</small>
+                                <div id="total-tasks" style="font-size: 1.8rem; font-weight: 800;">0</div>
                             </div>
                         </div>
-
                         <div id="contenedorExamenes"></div>
                     </div>
 
-                    <!-- INTERACCIÓN CON ASPIRANTE -->
-                    <div class="card" id="panel-interaccion" style="display: none;">
-                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                            <button class="btn btn-primary" onclick="switchTab('chat')" id="btn-tab-chat">Entrevista Directa</button>
-                            <button class="btn" style="background: #e2e8f0;" onclick="switchTab('plan')" id="btn-tab-plan">Observaciones HC</button>
-                            <button class="btn" style="background: #e2e8f0;" onclick="switchTab('links')" id="btn-tab-links">Material Formativo</button>
+                    <!-- REPORTES HC -->
+                    <div class="card" id="panel-hc" style="display: none;">
+                        <div style="display: flex; gap: 20px; border-bottom: 1px solid var(--border); margin-bottom: 20px;">
+                            <h3 style="cursor:pointer; border-bottom: 2px solid white; padding-bottom: 5px;">Observaciones del Tribunal</h3>
                         </div>
-
-                        <div id="tab-chat">
-                            <div id="chat-box"></div>
-                            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                                <input type="text" id="chat_input" placeholder="Realizar pregunta de entrevista...">
-                                <button class="btn btn-primary" style="width: 60px;" onclick="enviarMensaje()"><i class="fas fa-paper-plane"></i></button>
-                            </div>
-                        </div>
-
-                        <div id="tab-plan" style="display: none;">
-                            <textarea id="plan_text" rows="6" placeholder="Anotaciones de los Altos Cargos sobre el comportamiento del sujeto..."></textarea>
-                            <button class="btn btn-primary" onclick="guardarPlanificacion()" style="margin-top: 10px;">Guardar Informe</button>
-                        </div>
-
-                        <div id="tab-links" style="display: none;">
-                            <input type="text" id="link_name" placeholder="Título del PDF/Código" style="margin-bottom: 10px;">
-                            <input type="url" id="link_url" placeholder="URL del Documento">
-                            <button class="btn btn-primary" onclick="guardarEnlace()" style="margin-top: 10px;">Enviar a Aspirante</button>
-                            <div id="lista-enlaces" style="margin-top: 20px;"></div>
-                        </div>
+                        <textarea id="plan_text" rows="5" placeholder="Escriba aquí los detalles del comportamiento, disciplina y aptitud del aspirante..."></textarea>
+                        <button class="btn" onclick="guardarPlanificacion()">Archivar Informe en Registro Central</button>
                     </div>
                 </div>
             </div>
-
-            <!-- CENSO DE ASPIRANTES -->
-            <div class="card" style="margin-top: 40px;">
-                <h3><i class="fas fa-id-card-alt"></i> Registro de Inscritos</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
-                    <div>
-                        <label>Inscribir Candidato</label>
-                        <div style="display: flex; gap: 10px; margin-top: 10px;">
-                            <input type="text" id="new_alum_name" placeholder="Nombre IC / Discord">
-                            <input type="text" id="new_alum_id" placeholder="ID Registro">
-                            <button class="btn btn-primary" style="width: 50px;" onclick="registrarAlumno()"><i class="fas fa-user-plus"></i></button>
-                        </div>
-                    </div>
-                    <div>
-                        <label>Aspirantes en Proceso</label>
-                        <div id="lista-alumnos-registrados" style="max-height: 250px; overflow-y: auto; background: #f8fafc; border: 1px solid var(--border); border-radius: 4px; margin-top: 10px;"></div>
-                    </div>
-                </div>
-            </div>
-        </main>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, push, update, onValue, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // CONFIGURACIÓN DE TU FIREBASE
+        // CONFIGURACIÓN DE BASE DE DATOS
         const firebaseConfig = {
             apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
             authDomain: "examenes-profesoralumno.firebaseapp.com",
@@ -245,65 +201,56 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        let aspiranteActivo = null;
+        let aspiranteID = null;
 
-        // ACCESO SEGURIDAD
         window.verificarAcceso = async () => {
             const u = document.getElementById('user_login').value.trim();
             const p = document.getElementById('pass_login').value.trim();
             const snap = await get(ref(db, 'config/admin'));
             if (snap.exists() && u === snap.val().usuario && p === snap.val().password) {
                 document.getElementById('login-overlay').style.display = 'none';
-                document.getElementById('main-content-wrapper').style.display = 'block';
-            } else { document.getElementById('error-login').style.display = 'block'; }
+            }
         };
 
-        // TIEMPO PARA PRÓXIMA CONVOCATORIA
-        function actualizarReloj() {
-            const target = new Date("May 10, 2026 23:59:59").getTime();
-            const diff = target - new Date().getTime();
-            document.getElementById("days-left").innerText = Math.floor(diff / (1000*60*60*24));
-        }
-        setInterval(actualizarReloj, 86400000); actualizarReloj();
-
-        // BÚSQUEDA DE ASPIRANTES
         window.buscarAlumno = () => {
             const id = document.getElementById('search_id').value.trim();
             if(!id) return;
-            aspiranteActivo = id;
-            document.getElementById('panel-interaccion').style.display = 'block';
-            cargarChat(id); listarEnlaces(id); cargarPlanificacion(id);
+            aspiranteID = id;
+            document.getElementById('panel-hc').style.display = 'block';
+            document.getElementById('stats-area').style.display = 'grid';
 
             onValue(ref(db, 'examenes/' + id), (snap) => {
-                const data = snap.val();
                 const container = document.getElementById('contenedorExamenes');
                 container.innerHTML = "";
-                if(!data) { document.getElementById('stats-container').classList.add('hidden'); return; }
-                document.getElementById('stats-container').classList.remove('hidden');
-                
+                if(!snap.exists()) return;
+
                 let suma = 0, cont = 0;
-                Object.entries(data).forEach(([key, f]) => {
-                    if(f.nota) { suma += parseFloat(f.nota); cont++; }
-                    const statusClass = f.nota ? (parseFloat(f.nota) >= 5 ? 'apto' : 'no-apto') : '';
+                Object.entries(snap.val()).forEach(([key, f]) => {
+                    const grade = parseFloat(f.nota) || 0;
+                    if(f.nota) { suma += grade; cont++; }
+                    const statusClass = f.nota ? (grade >= 5 ? 'tag-apto' : 'tag-noapto') : '';
+                    
                     container.innerHTML += `
-                        <div class="phase-card ${statusClass}">
-                            <div>
-                                <small style="color:#64748b;">FASE:</small>
-                                <div style="font-weight:800;">${f.titulo}</div>
-                                <div class="grade-input">
-                                    <input type="number" id="n_${key}" value="${f.nota || ''}" placeholder="0-10" style="width:60px;">
-                                    <input type="text" id="c_${key}" value="${f.comentario || ''}" placeholder="Motivo de la calificación">
-                                    <button class="btn btn-primary" style="width:40px; padding:8px;" onclick="guardarNota('${id}','${key}')"><i class="fas fa-save"></i></button>
+                        <div class="exam-row ${statusClass}">
+                            <div style="display:flex; justify-content:space-between; align-items:start;">
+                                <div>
+                                    <span class="badge-dept" style="background:var(--accent-${f.dept?.toLowerCase() || 'cnp'})">${f.dept || 'CNP'}</span>
+                                    <div style="font-weight:800; margin-top:5px;">${f.titulo}</div>
                                 </div>
+                                <div style="font-family:'JetBrains Mono'; font-size:1.5rem; font-weight:800; color:var(--accent-cnp)">${f.nota || 'PND'}</div>
                             </div>
-                            <div style="text-align:right;">
-                                <a href="${f.url}" target="_blank" style="font-size:0.7rem; color:var(--accent);">VER EXAMEN <i class="fas fa-external-link-alt"></i></a>
+                            <div style="display:grid; grid-template-columns: 80px 1fr auto; gap:10px; margin-top:15px;">
+                                <input type="number" id="n_${key}" value="${f.nota || ''}" placeholder="Nota">
+                                <input type="text" id="c_${key}" value="${f.comentario || ''}" placeholder="Veredicto Tribunal">
+                                <button class="btn" style="width:40px;" onclick="guardarNota('${id}','${key}')"><i class="fas fa-save"></i></button>
                             </div>
+                            <a href="${f.url}" target="_blank" style="font-size:0.6rem; color:var(--text-dim); text-decoration:none;">EVIDENCIA: ${f.url}</a>
                         </div>`;
                 });
-                document.getElementById('avg-grade').innerText = cont > 0 ? (suma/cont).toFixed(1) : "0.0";
+                document.getElementById('avg-grade').innerText = cont > 0 ? (suma/cont).toFixed(1) : "--";
                 document.getElementById('total-tasks').innerText = cont;
             });
+            cargarPlanificacion(id);
         };
 
         window.guardarNota = async (a, e) => {
@@ -313,7 +260,17 @@
             });
         };
 
-        // GESTIÓN DE CENSO
+        window.crearExamen = async () => {
+            const id = document.getElementById('id_alumno').value;
+            const dept = document.getElementById('reg_dept').value;
+            await push(ref(db, 'examenes/' + id), { 
+                titulo: document.getElementById('titulo_examen').value, 
+                url: document.getElementById('url_examen').value,
+                dept: dept
+            });
+            alert("EXPEDIENTE ACTUALIZADO EXITOSAMENTE");
+        };
+
         window.registrarAlumno = async () => {
             const n = document.getElementById('new_alum_name').value;
             const id = document.getElementById('new_alum_id').value;
@@ -324,54 +281,18 @@
             const list = document.getElementById('lista-alumnos-registrados');
             list.innerHTML = "";
             if(snap.exists()) Object.entries(snap.val()).forEach(([id, info]) => {
-                list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #e2e8f0;">
-                    <span><i class="fas fa-user-circle"></i> ${info.nombre} <small>(${id})</small></span>
-                    <i class="fas fa-times" style="color:var(--warning); cursor:pointer;" onclick="eliminarAlumno('${id}')"></i>
+                list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid #1e293b; font-size:0.75rem;">
+                    <span>${info.nombre} <small style="color:#475569;">#${id}</small></span>
+                    <i class="fas fa-trash" style="cursor:pointer;" onclick="eliminarAlumno('${id}')"></i>
                 </div>`;
             });
         });
 
-        window.eliminarAlumno = async (id) => { if(confirm("¿Eliminar expediente del aspirante?")) await remove(ref(db, 'estudiantes_registrados/'+id)); };
-
-        // CHAT DE ENTREVISTA
-        window.switchTab = (tab) => {
-            ['chat', 'links', 'plan'].forEach(t => {
-                document.getElementById(`tab-${t}`).style.display = t === tab ? 'block' : 'none';
-                document.getElementById(`btn-tab-${t}`).style.background = t === tab ? 'var(--accent)' : '#e2e8f0';
-                document.getElementById(`btn-tab-${t}`).style.color = t === tab ? 'white' : 'var(--primary)';
-            });
-        };
-
-        function cargarChat(id) {
-            onValue(ref(db, 'chats/' + id), (snap) => {
-                const box = document.getElementById('chat-box'); box.innerHTML = "";
-                if(snap.exists()) Object.values(snap.val()).forEach(m => {
-                    box.innerHTML += `<div class="msg ${m.autor==='profesor'?'msg-prof':'msg-alum'}"><b>${m.autor.toUpperCase()}:</b><br>${m.texto}</div>`;
-                });
-                box.scrollTop = box.scrollHeight;
-            });
-        }
-
-        window.enviarMensaje = async () => {
-            const input = document.getElementById('chat_input');
-            if(input.value && aspiranteActivo) {
-                await push(ref(db, 'chats/' + aspiranteActivo), { texto: input.value, autor: "Examinador" });
-                input.value = "";
-            }
-        };
-
-        window.crearExamen = async () => {
-            const id = document.getElementById('id_alumno').value;
-            await push(ref(db, 'examenes/' + id), { 
-                titulo: document.getElementById('titulo_examen').value, 
-                url: document.getElementById('url_examen').value 
-            });
-            alert("Fase asignada correctamente.");
-        };
+        window.eliminarAlumno = async (id) => { if(confirm("¿ELIMINAR ASPIRANTE?")) await remove(ref(db, 'estudiantes_registrados/'+id)); };
 
         window.guardarPlanificacion = async () => {
-            await set(ref(db, 'planificacion/' + aspiranteActivo), { objetivos: document.getElementById('plan_text').value });
-            alert("Informe de HC guardado.");
+            await set(ref(db, 'planificacion/' + aspiranteID), { objetivos: document.getElementById('plan_text').value });
+            alert("REPORTE ARCHIVADO");
         };
 
         async function cargarPlanificacion(id) {
@@ -379,21 +300,10 @@
             document.getElementById('plan_text').value = snap.exists() ? snap.val().objetivos : "";
         }
 
-        window.guardarEnlace = async () => {
-            await push(ref(db, 'recursos/' + aspiranteActivo), { 
-                nombre: document.getElementById('link_name').value, 
-                url: document.getElementById('link_url').value 
-            });
+        window.filterDept = (dept) => {
+            document.getElementById('active-dept-title').innerText = "GESTIÓN DE " + dept;
+            document.getElementById('reg_dept').value = dept;
         };
-
-        function listarEnlaces(id) {
-            onValue(ref(db, 'recursos/' + id), (snap) => {
-                const list = document.getElementById('lista-enlaces'); list.innerHTML = "";
-                if(snap.exists()) Object.values(snap.val()).forEach(i => {
-                    list.innerHTML += `<div style="background:#e2e8f0; padding:8px; border-radius:4px; margin-bottom:5px; font-size:0.8rem; display:flex; justify-content:space-between;"><span>${i.nombre}</span><a href="${i.url}" target="_blank">DESCARGAR</a></div>`;
-                });
-            });
-        }
     </script>
 </body>
 </html>
