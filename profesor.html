@@ -2,69 +2,296 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Profesor - Firebase</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduManager Pro - Panel de Control</title>
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding-top: 50px; }
-        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        button:hover { background: #0056b3; }
-        .status { text-align: center; margin-top: 15px; color: #28a745; font-weight: bold; }
+        :root {
+            --primary: #0f172a;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--primary); 
+            margin: 0; 
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* BARRA LATERAL (Decorativa/Funcional) */
+        .sidebar {
+            width: 260px;
+            background: var(--primary);
+            color: white;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar h1 { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 10px; margin-bottom: 30px; }
+
+        /* CONTENIDO PRINCIPAL */
+        .main-content { flex: 1; padding: 40px; }
+
+        .header-title { margin-bottom: 30px; }
+        .header-title h2 { margin: 0; font-size: 1.8rem; }
+        .header-title p { color: #64748b; margin: 5px 0 0 0; }
+
+        .grid { display: grid; grid-template-columns: 350px 1fr; gap: 30px; align-items: start; }
+
+        /* ESTILO DE TARJETAS */
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+        }
+
+        .card h3 { margin-top: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+
+        /* FORMULARIOS */
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.025em; }
+        input, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+        input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+
+        /* LISTADO DE EXAMENES */
+        .search-bar { position: relative; margin-bottom: 25px; }
+        .search-bar input { padding-left: 45px; background: white; }
+        .search-bar i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+
+        .exam-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.2s;
+        }
+        .exam-card:hover { border-color: var(--accent); }
+
+        .exam-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-graded { background: #dcfce7; color: #166534; }
+
+        .grade-controls {
+            display: grid;
+            grid-template-columns: 80px 1fr 50px;
+            gap: 10px;
+            padding-top: 15px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .input-grade { text-align: center; font-weight: 800; color: var(--accent); }
+
+        /* RESPONSIVO */
+        @media (max-width: 1000px) {
+            .grid { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+        }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Panel del Profesor</h2>
-    <p>Asignar nuevo examen</p>
-    <input type="text" id="id_alumno" placeholder="ID del Alumno">
-    <input type="text" id="titulo" placeholder="Título del Examen">
-    <input type="url" id="url" placeholder="URL de Google Forms">
-    <button id="btnGuardar">Guardar Examen</button>
-    <div id="mensaje" class="status"></div>
-</div>
+    <aside class="sidebar">
+        <h1><i class="fas fa-graduation-cap"></i> EduManager</h1>
+        <div style="margin-top: auto; font-size: 0.8rem; opacity: 0.6;">
+            <p><i class="fas fa-circle" style="color: var(--success); font-size: 0.6rem;"></i> Servidor: España (Online)</p>
+        </div>
+    </aside>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    <main class="main-content">
+        <header class="header-title">
+            <h2>Panel del Instructor</h2>
+            <p>Gestiona contenidos y califica el progreso de tus alumnos en tiempo real.</p>
+        </header>
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
-        authDomain: "examenes-profesoralumno.firebaseapp.com",
-        databaseURL: "https://examenes-profesoralumno-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "examenes-profesoralumno",
-        storageBucket: "examenes-profesoralumno.firebasestorage.app",
-        messagingSenderId: "503796832177",
-        appId: "1:503796832177:web:b306d6971c8ed7a9becf90",
-        measurementId: "G-2662GS0WE7"
-    };
+        <div class="grid">
+            <!-- COLUMNA ASIGNAR -->
+            <div class="card">
+                <h3><i class="fas fa-paper-plane" style="color: var(--accent)"></i> Nueva Tarea</h3>
+                <div class="form-group">
+                    <label>ID Alumno</label>
+                    <input type="text" id="id_alumno" placeholder="ej: ALUM-001">
+                </div>
+                <div class="form-group">
+                    <label>Nombre del Examen</label>
+                    <input type="text" id="titulo_examen" placeholder="ej: Examen Final Matemáticas">
+                </div>
+                <div class="form-group">
+                    <label>Enlace de Google Forms</label>
+                    <input type="url" id="url_examen" placeholder="https://forms.gle/...">
+                </div>
+                <button class="btn btn-primary" onclick="crearExamen()">
+                    <i class="fas fa-plus"></i> Asignar Examen
+                </button>
+                <div id="notif" style="display:none; margin-top:15px; text-align:center; color: var(--success); font-weight:600; font-size:0.85rem;">
+                    ¡Asignado correctamente!
+                </div>
+            </div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+            <!-- COLUMNA CALIFICAR -->
+            <div class="card">
+                <h3><i class="fas fa-clipboard-check" style="color: var(--warning)"></i> Centro de Calificaciones</h3>
+                
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search_id" placeholder="Buscar alumno por ID..." onkeyup="if(event.key === 'Enter') buscarAlumno()">
+                </div>
 
-    document.getElementById('btnGuardar').onclick = async () => {
-        const id = document.getElementById('id_alumno').value.trim();
-        const titulo = document.getElementById('titulo').value.trim();
-        const url = document.getElementById('url').value.trim();
+                <div id="contenedorExamenes">
+                    <div style="text-align: center; padding: 40px; color: #94a3b8;">
+                        <i class="fas fa-folder-open fa-3x" style="margin-bottom: 15px; opacity: 0.3;"></i>
+                        <p>Busca un alumno para gestionar sus notas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
-        if(!id || !titulo || !url) return alert("Completa todos los campos");
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, push, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // 1. Asegurar que el alumno existe en la base de datos
-        await set(ref(db, 'alumnos/' + id), { activo: true });
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
+            authDomain: "examenes-profesoralumno.firebaseapp.com",
+            databaseURL: "https://examenes-profesoralumno-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "examenes-profesoralumno",
+            storageBucket: "examenes-profesoralumno.firebasestorage.app",
+            messagingSenderId: "503796832177",
+            appId: "1:503796832177:web:b306d6971c8ed7a9becf90",
+            measurementId: "G-2662GS0WE7"
+        };
 
-        // 2. Añadir el examen a la lista de ese alumno
-        const examenesRef = ref(db, 'examenes/' + id);
-        await push(examenesRef, {
-            titulo: titulo,
-            url: url,
-            fecha: new Date().toISOString()
-        });
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        document.getElementById('mensaje').innerText = "Examen enviado correctamente";
-        document.querySelectorAll('input').forEach(i => i.value = "");
-        setTimeout(() => document.getElementById('mensaje').innerText = "", 3000);
-    };
-</script>
+        // CREAR EXAMEN
+        window.crearExamen = async () => {
+            const id = document.getElementById('id_alumno').value.trim();
+            const titulo = document.getElementById('titulo_examen').value.trim();
+            const url = document.getElementById('url_examen').value.trim();
 
+            if(!id || !titulo || !url) return alert("Por favor, completa todos los datos.");
+
+            const notif = document.getElementById('notif');
+            
+            try {
+                await set(ref(db, 'alumnos/' + id), { activo: true });
+                await push(ref(db, 'examenes/' + id), {
+                    titulo: titulo,
+                    url: url,
+                    fecha: new Date().toISOString()
+                });
+                
+                notif.style.display = 'block';
+                document.querySelectorAll('input').forEach(i => i.value = "");
+                setTimeout(() => notif.style.display = 'none', 3000);
+            } catch(e) {
+                alert("Error al guardar: " + e.message);
+            }
+        };
+
+        // BUSCAR ALUMNO
+        window.buscarAlumno = () => {
+            const id = document.getElementById('search_id').value.trim();
+            if(!id) return;
+
+            const refExamenes = ref(db, 'examenes/' + id);
+            onValue(refExamenes, (snapshot) => {
+                const data = snapshot.val();
+                const container = document.getElementById('contenedorExamenes');
+                container.innerHTML = "";
+
+                if(!data) {
+                    container.innerHTML = `<div style="text-align:center; padding:20px; color:#ef4444;">No se encontraron exámenes para el ID: ${id}</div>`;
+                    return;
+                }
+
+                Object.entries(data).forEach(([key, ex]) => {
+                    const graded = ex.nota !== undefined;
+                    const div = document.createElement('div');
+                    div.className = 'exam-card';
+                    div.innerHTML = `
+                        <div class="exam-info">
+                            <div>
+                                <span style="font-size: 0.8rem; color: #64748b; font-weight:600;">${new Date(ex.fecha).toLocaleDateString()}</span>
+                                <h4 style="margin: 5px 0;">${ex.titulo}</h4>
+                            </div>
+                            <span class="status-badge ${graded ? 'status-graded' : 'status-pending'}">
+                                ${graded ? 'Calificado' : 'Pendiente'}
+                            </span>
+                        </div>
+                        <div class="grade-controls">
+                            <input type="number" class="input-grade" id="n_${key}" value="${ex.nota || ''}" placeholder="Nota" min="0" max="10" step="0.1">
+                            <input type="text" id="c_${key}" value="${ex.comentario || ''}" placeholder="Feedback para el alumno...">
+                            <button class="btn btn-primary" style="padding: 10px;" onclick="guardarNota('${id}', '${key}')">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            });
+        };
+
+        // GUARDAR NOTA
+        window.guardarNota = async (alumnoId, examenKey) => {
+            const nota = document.getElementById(`n_${examenKey}`).value;
+            const comentario = document.getElementById(`c_${examenKey}`).value;
+
+            if(nota === "") return alert("Debes asignar una nota numérica.");
+
+            const updates = {};
+            updates[`/examenes/${alumnoId}/${examenKey}/nota`] = nota;
+            updates[`/examenes/${alumnoId}/${examenKey}/comentario`] = comentario;
+
+            await update(ref(db), updates);
+            alert("Calificación enviada al alumno correctamente.");
+        };
+    </script>
 </body>
 </html>
