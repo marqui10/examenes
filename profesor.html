@@ -2,58 +2,69 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Admin - Enviar Examen</title>
+    <title>Profesor - Firebase</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; padding: 40px; background: #fdf2f2; }
-        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 350px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #d9534f; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        #status { margin-top: 15px; font-weight: bold; text-align: center; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding-top: 50px; }
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        button:hover { background: #0056b3; }
+        .status { text-align: center; margin-top: 15px; color: #28a745; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>Panel Profesor</h2>
-    <input type="text" id="idAlumno" placeholder="ID del Alumno">
-    <input type="url" id="linkExamen" placeholder="Enlace de Google Forms">
-    <button onclick="enviarExamen()">ENVIAR EXAMEN</button>
-    <p id="status"></p>
+    <h2>Panel del Profesor</h2>
+    <p>Asignar nuevo examen</p>
+    <input type="text" id="id_alumno" placeholder="ID del Alumno">
+    <input type="text" id="titulo" placeholder="Título del Examen">
+    <input type="url" id="url" placeholder="URL de Google Forms">
+    <button id="btnGuardar">Guardar Examen</button>
+    <div id="mensaje" class="status"></div>
 </div>
 
-<script>
-    async function enviarExamen() {
-        const id = document.getElementById('idAlumno').value.trim();
-        const url = document.getElementById('linkExamen').value.trim();
-        const status = document.getElementById('status');
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        if (!id || !url) return alert("Rellena los campos");
+    const firebaseConfig = {
+        apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
+        authDomain: "examenes-profesoralumno.firebaseapp.com",
+        databaseURL: "https://examenes-profesoralumno-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "examenes-profesoralumno",
+        storageBucket: "examenes-profesoralumno.firebasestorage.app",
+        messagingSenderId: "503796832177",
+        appId: "1:503796832177:web:b306d6971c8ed7a9becf90",
+        measurementId: "G-2662GS0WE7"
+    };
 
-        status.innerText = "Enviando...";
-        status.style.color = "blue";
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-        // URL directa a tu base de datos (REST API)
-        const dbURL = `https://firebasedatabase.app{id}.json`;
+    document.getElementById('btnGuardar').onclick = async () => {
+        const id = document.getElementById('id_alumno').value.trim();
+        const titulo = document.getElementById('titulo').value.trim();
+        const url = document.getElementById('url').value.trim();
 
-        try {
-            const response = await fetch(dbURL, {
-                method: 'PUT',
-                body: JSON.stringify({ url: url }),
-                headers: { 'Content-Type': 'application/json' }
-            });
+        if(!id || !titulo || !url) return alert("Completa todos los campos");
 
-            if (response.ok) {
-                status.innerText = "✅ ¡Enviado con éxito!";
-                status.style.color = "green";
-            } else {
-                status.innerText = "❌ Error en el servidor";
-                status.style.color = "red";
-            }
-        } catch (error) {
-            status.innerText = "❌ Error de conexión";
-            status.style.color = "red";
-        }
-    }
+        // 1. Asegurar que el alumno existe en la base de datos
+        await set(ref(db, 'alumnos/' + id), { activo: true });
+
+        // 2. Añadir el examen a la lista de ese alumno
+        const examenesRef = ref(db, 'examenes/' + id);
+        await push(examenesRef, {
+            titulo: titulo,
+            url: url,
+            fecha: new Date().toISOString()
+        });
+
+        document.getElementById('mensaje').innerText = "Examen enviado correctamente";
+        document.querySelectorAll('input').forEach(i => i.value = "");
+        setTimeout(() => document.getElementById('mensaje').innerText = "", 3000);
+    };
 </script>
+
 </body>
 </html>
