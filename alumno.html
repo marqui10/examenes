@@ -45,7 +45,15 @@
             position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
         }
 
-        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+        .container { max-width: 1100px; margin: 20px auto; padding: 0 20px; }
+
+        /* Banner de Anuncios */
+        #global-announcement-banner {
+            background: #fffbeb; border: 1px solid #fef3c7; border-left: 5px solid var(--warning);
+            padding: 15px 20px; border-radius: 12px; margin-bottom: 25px;
+            display: flex; align-items: center; gap: 15px; animation: slideDown 0.5s ease-out;
+        }
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         /* Stats Row */
         .stats-grid { 
@@ -70,7 +78,7 @@
             padding: 10px 20px; cursor: pointer; border-radius: 8px; font-weight: 600;
             transition: 0.3s; color: var(--text-muted);
         }
-        .nav-tab.active { background: white; color: var(--primary); shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .nav-tab.active { background: white; color: var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
 
         /* Content Cards */
         .content-grid { display: grid; grid-template-columns: 1fr 350px; gap: 30px; }
@@ -98,7 +106,7 @@
         /* Forms */
         input { 
             width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 12px;
-            font-family: inherit; margin-bottom: 15px; transition: 0.3s;
+            font-family: inherit; margin-bottom: 15px; transition: 0.3s; box-sizing: border-box;
         }
         input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
         
@@ -131,15 +139,16 @@
                 <div style="background: #eef2ff; width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
                     <i class="fas fa-graduation-cap fa-2x" style="color: var(--primary);"></i>
                 </div>
-                <h2 style="margin: 0;">¡Bienvenido!</h2>
-                <p style="color: var(--text-muted);">Accede a tus clases y notas</p>
+                <h2 style="margin: 0;">Portal Estudiantil</h2>
+                <p style="color: var(--text-muted);">Introduce tu ID para ingresar</p>
             </div>
             
-            <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Tu ID de Estudiante</label>
-            <input type="text" id="idEstudiante" placeholder="ej: ALUM-001">
+            <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">ID de Estudiante</label>
+            <input type="text" id="idEstudiante" placeholder="ej: ALUM-001" onkeyup="if(event.key === 'Enter') intentarLogin()">
             <button class="btn btn-primary" onclick="intentarLogin()" style="width: 100%;">
-                Comenzar <i class="fas fa-arrow-right"></i>
+                Acceder <i class="fas fa-arrow-right"></i>
             </button>
+            <p id="loginError" style="color: var(--danger); font-size: 0.8rem; text-align: center; margin-top: 15px; display: none;">ID no válido o no registrado.</p>
         </div>
     </div>
 
@@ -147,16 +156,25 @@
     <div id="sectionDashboard" class="hidden">
         <nav class="navbar">
             <div style="display: flex; align-items: center; gap: 12px;">
-                <i class="fas fa-circle-nodes style="color: var(--primary);"></i>
+                <i class="fas fa-circle-nodes" style="color: var(--primary);"></i>
                 <span style="font-weight: 800; letter-spacing: -0.5px; font-size: 1.2rem;">EduManager <span style="color: var(--primary);">Student</span></span>
             </div>
             <div style="display: flex; align-items: center; gap: 20px;">
-                <span id="labelNombre" style="font-weight: 600; font-size: 0.9rem;">Cargando...</span>
+                <span id="labelNombre" style="font-weight: 600; font-size: 0.9rem; background: #f3f4f6; padding: 5px 12px; border-radius: 8px;">Cargando...</span>
                 <button onclick="location.reload()" class="btn" style="background: #fee2e2; color: var(--danger); padding: 8px 15px;"><i class="fas fa-power-off"></i></button>
             </div>
         </nav>
 
         <div class="container">
+            <!-- ANUNCIO GLOBAL -->
+            <div id="global-announcement-banner" class="hidden">
+                <i class="fas fa-bullhorn fa-lg" style="color: var(--warning)"></i>
+                <div>
+                    <strong style="display: block; font-size: 0.8rem; color: #92400e; text-transform: uppercase;">Aviso del Profesor</strong>
+                    <span id="announcement-text" style="font-size: 0.95rem; font-weight: 600; color: #78350f;"></span>
+                </div>
+            </div>
+
             <!-- Stats -->
             <div class="stats-grid">
                 <div class="stat-card">
@@ -191,7 +209,7 @@
                     <div id="chat-container">
                         <div id="chat-messages"></div>
                         <div style="padding: 15px; background: white; border-top: 1px solid #eee; display: flex; gap: 8px;">
-                            <input type="text" id="inputMsg" placeholder="Pregunta algo..." style="margin-bottom: 0; padding: 10px;">
+                            <input type="text" id="inputMsg" placeholder="Pregunta algo..." style="margin-bottom: 0; padding: 10px;" onkeyup="if(event.key === 'Enter') enviarMsg()">
                             <button class="btn btn-primary" style="padding: 10px;" onclick="enviarMsg()"><i class="fas fa-paper-plane"></i></button>
                         </div>
                     </div>
@@ -205,8 +223,8 @@
         <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center; color: white;">
             <h3 id="modalTitle" style="margin:0;">Examen en curso</h3>
             <div style="display: flex; gap: 10px;">
-                <button class="btn" style="background: rgba(255,255,255,0.1); color: white;" onclick="window.open(document.getElementById('frameExamen').src, '_blank')"><i class="fas fa-external-link-alt"></i></button>
-                <button class="btn" style="background: var(--danger); color: white;" onclick="cerrarExamen()">&times; Cerrar</button>
+                <button class="btn" style="background: rgba(255,255,255,0.1); color: white;" onclick="window.open(document.getElementById('frameExamen').src, '_blank')"><i class="fas fa-external-link-alt"></i> Abrir en otra pestaña</button>
+                <button class="btn" style="background: var(--danger); color: white;" onclick="cerrarExamen()">&times; Salir</button>
             </div>
         </div>
         <iframe id="frameExamen" style="flex-grow: 1; border: none; background: white; margin: 0 20px 20px; border-radius: 15px;"></iframe>
@@ -216,7 +234,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, push, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Mismo Config de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
             authDomain: "examenes-profesoralumno.firebaseapp.com",
@@ -232,27 +249,43 @@
         const db = getDatabase(app);
         let idActual = "";
 
+        // --- LOGIN MEJORADO ---
         window.intentarLogin = async () => {
             const id = document.getElementById('idEstudiante').value.trim();
+            const errorLabel = document.getElementById('loginError');
             if(!id) return;
 
-            const snap = await get(ref(db, `alumnos/${id}`));
+            // Validar contra la nueva base de datos de estudiantes registrados
+            const snap = await get(ref(db, `estudiantes_registrados/${id}`));
             if(snap.exists()) {
+                const info = snap.val();
                 idActual = id;
                 document.getElementById('sectionLogin').classList.add('hidden');
                 document.getElementById('sectionDashboard').classList.remove('hidden');
-                document.getElementById('labelNombre').innerText = "Estudiante: " + id;
+                document.getElementById('labelNombre').innerText = info.nombre;
                 iniciarSincronizacion();
             } else {
-                alert("ID no encontrado en la base de datos.");
+                errorLabel.style.display = 'block';
             }
         };
 
         function iniciarSincronizacion() {
+            // Sincronizar Anuncio Global
+            onValue(ref(db, 'config/anuncio_global'), (snap) => {
+                const banner = document.getElementById('global-announcement-banner');
+                const text = document.getElementById('announcement-text');
+                const data = snap.val();
+                if(data && data.texto) {
+                    text.innerText = data.texto;
+                    banner.classList.remove('hidden');
+                } else {
+                    banner.classList.add('hidden');
+                }
+            });
+
             // Sincronizar Exámenes y Notas
             onValue(ref(db, `examenes/${idActual}`), (snap) => {
-                const data = snap.val();
-                renderizarExamenes(data);
+                renderizarExamenes(snap.val());
             });
 
             // Sincronizar Chat
@@ -281,12 +314,11 @@
             listTareas.innerHTML = "";
             listNotas.innerHTML = "";
             
-            let pendientes = 0;
-            let sumaNotas = 0;
-            let contNotas = 0;
+            let pendientes = 0, sumaNotas = 0, contNotas = 0;
 
             if(!data) {
-                listTareas.innerHTML = "<p style='color:gray; text-align:center;'>No tienes tareas asignadas aún.</p>";
+                listTareas.innerHTML = "<div style='padding:40px; text-align:center; color:#94a3b8'><i class='fas fa-tasks fa-2x'></i><p>No tienes tareas asignadas.</p></div>";
+                listNotas.innerHTML = "<div style='padding:40px; text-align:center; color:#94a3b8'><i class='fas fa-graduation-cap fa-2x'></i><p>Aún no hay calificaciones.</p></div>";
                 return;
             }
 
@@ -294,14 +326,14 @@
                 const card = document.createElement('div');
                 card.className = 'exam-card';
 
-                if(ex.nota === undefined) {
+                if(ex.nota === undefined || ex.nota === "") {
                     pendientes++;
                     card.innerHTML = `
                         <div>
                             <h4 style="margin:0;">${ex.titulo}</h4>
-                            <small style="color:var(--text-muted)">Asignado: ${new Date(ex.fecha).toLocaleDateString()}</small>
+                            <small style="color:var(--text-muted)">Publicado: ${new Date(ex.fecha).toLocaleDateString()}</small>
                         </div>
-                        <button class="btn btn-primary" onclick="abrirExamen('${ex.url}', '${ex.titulo}')">Abrir Tarea</button>
+                        <button class="btn btn-primary" onclick="abrirExamen('${ex.url}', '${ex.titulo}')">Abrir Tarea <i class="fas fa-external-link-alt"></i></button>
                     `;
                     listTareas.appendChild(card);
                 } else {
@@ -312,7 +344,7 @@
                     card.innerHTML = `
                         <div>
                             <h4 style="margin:0;">${ex.titulo}</h4>
-                            <p style="margin:5px 0 0; font-size:0.85rem; color:#6b7280;">${ex.comentario || 'Sin comentarios'}</p>
+                            <p style="margin:5px 0 0; font-size:0.85rem; color:#6b7280;"><i class="fas fa-comment-alt"></i> Feedback: ${ex.comentario || 'Sin comentarios adicionales.'}</p>
                         </div>
                         <div class="grade-pill" style="background:${bgNota}; color:${colorNota}">${ex.nota}</div>
                     `;
@@ -328,16 +360,16 @@
             const container = document.getElementById('vista-recursos');
             container.innerHTML = "";
             if(!recursos) {
-                container.innerHTML = "<p>No hay material extra compartido.</p>";
+                container.innerHTML = "<p style='text-align:center; color:#94a3b8; padding:20px;'>Tu profesor no ha compartido material adicional todavía.</p>";
                 return;
             }
             Object.values(recursos).forEach(r => {
                 container.innerHTML += `
                     <div class="exam-card">
                         <div>
-                            <h4 style="margin:0;"><i class="fas fa-file-pdf" style="color:var(--danger)"></i> ${r.nombre}</h4>
+                            <h4 style="margin:0;"><i class="fas fa-file-alt" style="color:var(--primary)"></i> ${r.nombre}</h4>
                         </div>
-                        <a href="${r.url}" target="_blank" class="btn" style="background:#eef2ff; color:var(--primary)">Descargar</a>
+                        <a href="${r.url}" target="_blank" class="btn" style="background:#eef2ff; color:var(--primary)">Ver Material</a>
                     </div>
                 `;
             });
@@ -373,7 +405,6 @@
             document.getElementById('modalExamen').style.display = 'none';
             document.getElementById('frameExamen').src = "";
         };
-
     </script>
 </body>
 </html>
