@@ -2,67 +2,79 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Panel Admin - PAU</title>
-    <!-- ENLACES CORREGIDOS: Versión específica de Firebase -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Enviar Examen</title>
+    
+    <!-- LIBRERÍAS DE FIREBASE (Versión Estable) -->
     <script src="https://gstatic.com"></script>
     <script src="https://gstatic.com"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { color: #2c3e50; text-align: center; margin-top: 0; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        button { width: 100%; padding: 14px; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #c0392b; }
+        #status { text-align: center; margin-top: 15px; font-weight: bold; }
+    </style>
 </head>
-<body style="font-family: sans-serif; padding: 20px; background: #fdf2f2;">
-    <h2>Enviar Formulario al Alumno</h2>
-    <div style="background:white; padding:20px; border-radius:10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width:400px;">
-        <input type="text" id="idAlumno" placeholder="ID del Alumno" style="width:90%; padding:10px; margin-bottom:10px;"><br>
-        <input type="url" id="linkForm" placeholder="URL de Google Forms" style="width:90%; padding:10px; margin-bottom:10px;"><br>
-        <button onclick="enviarExamen()" style="width:96%; padding:10px; background:#d9534f; color:white; border:none; cursor:pointer; font-weight:bold;">SUBIR EXAMEN</button>
-        <p id="msg" style="margin-top:15px; font-weight:bold;"></p>
-    </div>
+<body>
 
-    <script>
-        // Tu configuración REAL
-        const firebaseConfig = {
-            apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
-            authDomain: "://firebaseapp.com",
-            databaseURL: "https://firebasedatabase.app",
-            projectId: "examenes-profesoralumno",
-            storageBucket: "examenes-profesoralumno.firebasestorage.app",
-            messagingSenderId: "503796832177",
-            appId: "1:503796832177:web:b306d6971c8ed7a9becf90"
-        };
+<div class="card">
+    <h2>Panel Profesor</h2>
+    <input type="text" id="idAlumno" placeholder="ID del Alumno (ej: MARCOS01)">
+    <input type="text" id="titulo" placeholder="Nombre del Examen">
+    <input type="url" id="linkExamen" placeholder="Enlace de Google Forms">
+    <button onclick="enviarExamen()">PUBLICAR PARA EL ALUMNO</button>
+    <p id="status"></p>
+</div>
 
-        // Inicialización segura
-        var db;
-        try {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.database();
-            console.log("Firebase listo en GitHub Pages");
-        } catch (e) {
-            console.error("Error crítico:", e);
+<script>
+    // TU CONFIGURACIÓN REAL DE FIREBASE
+    const firebaseConfig = {
+        apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
+        authDomain: "://firebaseapp.com",
+        databaseURL: "https://firebasedatabase.app",
+        projectId: "examenes-profesoralumno",
+        storageBucket: "examenes-profesoralumno.firebasestorage.app",
+        messagingSenderId: "503796832177",
+        appId: "1:503796832177:web:b306d6971c8ed7a9becf90"
+    };
+
+    // Inicialización
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function enviarExamen() {
+        const id = document.getElementById('idAlumno').value.trim();
+        const titulo = document.getElementById('titulo').value.trim();
+        const url = document.getElementById('linkExamen').value.trim();
+        const status = document.getElementById('status');
+
+        if (!id || !url) {
+            alert("Por favor, rellena el ID y el enlace.");
+            return;
         }
 
-        function enviarExamen() {
-            const id = document.getElementById('idAlumno').value;
-            const url = document.getElementById('linkForm').value;
-            const msg = document.getElementById('msg');
+        status.style.color = "blue";
+        status.innerText = "Subiendo a la nube...";
 
-            if (typeof db === 'undefined') {
-                alert("Error: Firebase no cargó correctamente.");
-                return;
-            }
-
-            if(!id || !url) return alert("Completa los campos");
-
-            msg.style.color = "blue";
-            msg.innerText = "Subiendo...";
-
-            db.ref('examenes/' + id).set({ url: url })
-                .then(() => {
-                    msg.style.color = "green";
-                    msg.innerText = "✅ ¡Enviado con éxito!";
-                })
-                .catch(err => {
-                    msg.style.color = "red";
-                    msg.innerText = "❌ Error: " + err.message;
-                });
-        }
-    </script>
+        // Guardar en la ruta /examenes/ID_DEL_ALUMNO
+        db.ref('examenes/' + id).set({
+            titulo: titulo,
+            url: url,
+            enviadoEl: new Date().toLocaleString()
+        })
+        .then(() => {
+            status.style.color = "green";
+            status.innerText = "✅ ¡Examen enviado con éxito!";
+        })
+        .catch((error) => {
+            status.style.color = "red";
+            status.innerText = "❌ Error: " + error.message;
+        });
+    }
+</script>
 </body>
 </html>
