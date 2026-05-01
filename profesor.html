@@ -2,78 +2,57 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Enviar Examen</title>
-    
-    <!-- LIBRERÍAS DE FIREBASE (Versión Estable) -->
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
-
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        h2 { color: #2c3e50; text-align: center; margin-top: 0; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
-        button { width: 100%; padding: 14px; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { background: #c0392b; }
-        #status { text-align: center; margin-top: 15px; font-weight: bold; }
+        body { font-family: sans-serif; display: flex; justify-content: center; padding: 40px; background: #fdf2f2; }
+        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 350px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #d9534f; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        #status { margin-top: 15px; font-weight: bold; text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <h2>Panel Profesor</h2>
-    <input type="text" id="idAlumno" placeholder="ID del Alumno (ej: MARCOS01)">
-    <input type="text" id="titulo" placeholder="Nombre del Examen">
+    <input type="text" id="idAlumno" placeholder="ID del Alumno">
     <input type="url" id="linkExamen" placeholder="Enlace de Google Forms">
-    <button onclick="enviarExamen()">PUBLICAR PARA EL ALUMNO</button>
+    <button onclick="enviarExamen()">ENVIAR EXAMEN</button>
     <p id="status"></p>
 </div>
 
 <script>
-    // TU CONFIGURACIÓN REAL DE FIREBASE
-    const firebaseConfig = {
-        apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
-        authDomain: "://firebaseapp.com",
-        databaseURL: "https://firebasedatabase.app",
-        projectId: "examenes-profesoralumno",
-        storageBucket: "examenes-profesoralumno.firebasestorage.app",
-        messagingSenderId: "503796832177",
-        appId: "1:503796832177:web:b306d6971c8ed7a9becf90"
-    };
-
-    // Inicialización
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    function enviarExamen() {
+    async function enviarExamen() {
         const id = document.getElementById('idAlumno').value.trim();
-        const titulo = document.getElementById('titulo').value.trim();
         const url = document.getElementById('linkExamen').value.trim();
         const status = document.getElementById('status');
 
-        if (!id || !url) {
-            alert("Por favor, rellena el ID y el enlace.");
-            return;
-        }
+        if (!id || !url) return alert("Rellena los campos");
 
+        status.innerText = "Enviando...";
         status.style.color = "blue";
-        status.innerText = "Subiendo a la nube...";
 
-        // Guardar en la ruta /examenes/ID_DEL_ALUMNO
-        db.ref('examenes/' + id).set({
-            titulo: titulo,
-            url: url,
-            enviadoEl: new Date().toLocaleString()
-        })
-        .then(() => {
-            status.style.color = "green";
-            status.innerText = "✅ ¡Examen enviado con éxito!";
-        })
-        .catch((error) => {
+        // URL directa a tu base de datos (REST API)
+        const dbURL = `https://firebasedatabase.app{id}.json`;
+
+        try {
+            const response = await fetch(dbURL, {
+                method: 'PUT',
+                body: JSON.stringify({ url: url }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (response.ok) {
+                status.innerText = "✅ ¡Enviado con éxito!";
+                status.style.color = "green";
+            } else {
+                status.innerText = "❌ Error en el servidor";
+                status.style.color = "red";
+            }
+        } catch (error) {
+            status.innerText = "❌ Error de conexión";
             status.style.color = "red";
-            status.innerText = "❌ Error: " + error.message;
-        });
+        }
     }
 </script>
 </body>
