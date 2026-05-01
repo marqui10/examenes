@@ -190,7 +190,7 @@
             const id = document.getElementById('alumno_id_input').value.trim();
             if(!id) return alert("Ingresa tu ID");
 
-            const snapshot = await get(ref(db, 'estudiantes_registrados/' + id));
+            const snapshot = await get(ref(db, 'alumnos/' + id));
             if(snapshot.exists()) {
                 currentAlumId = id;
                 document.getElementById('login-screen').style.display = 'none';
