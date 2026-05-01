@@ -1,333 +1,251 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>S.I.G.E PRO - Alumno</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
-
-<style>
-:root {
-    --bg:#05070a;
-    --card:#0f121a;
-    --border:#1e293b;
-    --text:#f8fafc;
-    --dim:#94a3b8;
-    --ok:#10b981;
-    --bad:#ef4444;
-}
-
-body {
-    margin:0;
-    font-family:'Plus Jakarta Sans';
-    background:var(--bg);
-    color:var(--text);
-}
-
-/* LOGIN */
-#login {
-    position:fixed;
-    inset:0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:#000;
-}
-
-.box {
-    background:var(--card);
-    padding:30px;
-    border:1px solid var(--border);
-    border-radius:12px;
-}
-
-/* NAV */
-.nav {
-    display:none;
-    padding:20px;
-    border-bottom:1px solid var(--border);
-    justify-content:space-between;
-}
-
-/* MAIN */
-.container {
-    display:none;
-    padding:30px;
-}
-
-.grid {
-    display:grid;
-    grid-template-columns: 1fr 350px;
-    gap:20px;
-}
-
-/* CARD */
-.card {
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:20px;
-    margin-bottom:20px;
-}
-
-/* EXAM */
-.exam {
-    background:#000;
-    padding:15px;
-    margin-bottom:10px;
-    border-left:4px solid var(--border);
-}
-
-.apto { border-color:var(--ok); }
-.noapto { border-color:var(--bad); }
-
-/* CHAT */
-#chat {
-    height:300px;
-    overflow-y:auto;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-
-.msg {
-    padding:10px;
-    border-radius:10px;
-    max-width:75%;
-}
-
-.alum { background:#2563eb; align-self:flex-end; }
-.prof { background:#1e293b; align-self:flex-start; }
-
-/* INPUT */
-input {
-    width:100%;
-    padding:10px;
-    background:#000;
-    border:1px solid var(--border);
-    color:white;
-}
-
-/* BUTTON */
-.btn {
-    padding:10px;
-    background:white;
-    color:black;
-    border:none;
-    font-weight:800;
-    cursor:pointer;
-}
-
-/* TOAST */
-#toast {
-    position:fixed;
-    bottom:20px;
-    right:20px;
-    background:#000;
-    padding:10px;
-    display:none;
-}
-</style>
-</head>
-
-<body>
-
-<!-- LOGIN -->
-<div id="login">
-    <div class="box">
-        <h3>Acceso Alumno</h3>
-        <input id="user" placeholder="ID">
-        <button class="btn" onclick="login()">Entrar</button>
-    </div>
-</div>
-
-<!-- NAV -->
-<div class="nav" id="nav">
-    <div id="userLabel"></div>
-    <button class="btn" onclick="logout()">Salir</button>
-</div>
-
-<!-- MAIN -->
-<div class="container" id="app">
-
-<div class="grid">
-
-<!-- IZQUIERDA -->
-<div>
-
-<div class="card">
-    <h3>Observaciones</h3>
-    <div id="obs">Cargando...</div>
-</div>
-
-<div class="card">
-    <h3>Exámenes</h3>
-    <div id="exams"></div>
-</div>
-
-</div>
-
-<!-- DERECHA -->
-<div>
-
-<div class="card">
-    <h3>Chat</h3>
-    <div id="chat"></div>
-
-    <div style="display:flex; gap:5px; margin-top:10px;">
-        <input id="msg">
-        <button class="btn" onclick="send()">OK</button>
-    </div>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div id="toast"></div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-const app = initializeApp({
-    apiKey:"TU_API",
-    databaseURL:"TU_DB"
-});
-
-const db = getDatabase(app);
-
-let uid = null;
-
-/* ===== UTILS ===== */
-
-const $ = id => document.getElementById(id);
-
-function toast(t) {
-    const el = $("toast");
-    el.innerText = t;
-    el.style.display="block";
-    setTimeout(()=>el.style.display="none",2000);
-}
-
-function clean(t){
-    return t.replace(/[<>]/g,"");
-}
-
-/* ===== LOGIN ===== */
-
-window.login = () => {
-    const id = clean($("user").value);
-    if(!id) return;
-
-    uid = id;
-
-    $("login").style.display="none";
-    $("nav").style.display="flex";
-    $("app").style.display="block";
-
-    $("userLabel").innerText = "Alumno: " + id;
-
-    init(id);
-};
-
-window.logout = ()=>location.reload();
-
-/* ===== INIT ===== */
-
-function init(id){
-
-    /* OBS */
-    onValue(ref(db,"planificacion/"+id),(snap)=>{
-        $("obs").innerText = snap.exists() 
-            ? snap.val().objetivos 
-            : "Sin observaciones";
-    });
-
-    /* EXAMS */
-    onValue(ref(db,"examenes/"+id),(snap)=>{
-        renderExams(snap.val());
-    });
-
-    /* CHAT */
-    onValue(ref(db,"chats/"+id),(snap)=>{
-        renderChat(snap.val());
-    });
-}
-
-/* ===== RENDER ===== */
-
-function renderExams(data){
-    const cont = $("exams");
-    cont.innerHTML="";
-
-    if(!data){
-        cont.innerHTML="Sin exámenes";
-        return;
-    }
-
-    Object.values(data)
-    .sort((a,b)=>b.fecha-a.fecha)
-    .forEach(e=>{
-        const div = document.createElement("div");
-        div.className="exam";
-
-        const nota = parseFloat(e.nota);
-        if(!isNaN(nota)){
-            div.classList.add(nota>=5?"apto":"noapto");
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.I.G.E. - Portal del Aspirante</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #05070a;
+            --accent-cnp: #1e40af;
+            --accent-gc: #064e3b;
+            --accent-fire: #991b1b;
+            --accent-ems: #0891b2;
+            --accent-dgt: #854d0e;
+            --bg: #0f121a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: #334155;
         }
 
-        div.innerHTML = `
-            <strong>${e.titulo}</strong>
-            <div>${e.dept}</div>
-            <div>Nota: ${e.nota || "PND"}</div>
-            ${!e.nota ? `<a href="${e.url}" target="_blank">Ir</a>`:""}
-        `;
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--primary); 
+            color: var(--text-main); 
+            margin: 0; 
+        }
 
-        cont.appendChild(div);
-    });
-}
+        /* --- PANTALLA DE ACCESO --- */
+        #login-screen {
+            position: fixed; inset: 0; background: radial-gradient(circle at center, #1e293b 0%, #05070a 100%);
+            display: flex; align-items: center; justify-content: center; z-index: 1000;
+        }
 
-function renderChat(data){
-    const box = $("chat");
-    box.innerHTML="";
+        .login-card {
+            background: rgba(15, 18, 26, 0.8); backdrop-filter: blur(10px);
+            padding: 40px; border-radius: 24px; border: 1px solid var(--border);
+            width: 100%; max-width: 350px; text-align: center;
+        }
 
-    if(!data) return;
+        /* --- NAVEGACIÓN --- */
+        .navbar {
+            padding: 20px 40px; background: rgba(5, 7, 10, 0.9); border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center; sticky: top;
+        }
 
-    Object.values(data)
-    .sort((a,b)=>a.fecha-b.fecha)
-    .forEach(m=>{
-        const div = document.createElement("div");
-        div.className = "msg " + (m.autor==="profesor"?"prof":"alum");
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px; display: none; }
 
-        div.innerText = `[${new Date(m.fecha).toLocaleTimeString()}] ${m.texto}`;
+        .grid-layout { display: grid; grid-template-columns: 1fr 380px; gap: 30px; }
 
-        box.appendChild(div);
-    });
+        .card {
+            background: var(--bg); border-radius: 16px; padding: 25px;
+            border: 1px solid var(--border); margin-bottom: 25px;
+        }
 
-    box.scrollTop = box.scrollHeight;
-}
+        /* --- ESTILOS DE PRUEBAS --- */
+        .exam-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px; background: rgba(0,0,0,0.3); border-radius: 12px;
+            border-left: 5px solid var(--border); margin-bottom: 15px;
+        }
+        .dept-tag { font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; margin-bottom: 5px; display: inline-block; }
+        
+        .nota-box {
+            font-family: 'JetBrains Mono', monospace; font-size: 1.8rem; font-weight: 800;
+            min-width: 60px; text-align: center;
+        }
 
-/* ===== CHAT SEND ===== */
+        /* --- CHAT --- */
+        #chat-display { height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 10px; }
+        .msg { padding: 12px 18px; border-radius: 15px; font-size: 0.9rem; max-width: 80%; line-height: 1.4; }
+        .msg-alum { align-self: flex-end; background: #3b82f6; color: white; border-bottom-right-radius: 2px; }
+        .msg-prof { align-self: flex-start; background: var(--border); color: white; border-bottom-left-radius: 2px; }
 
-window.send = async ()=>{
-    const input = $("msg");
+        /* --- ELEMENTOS DE FORMULARIO --- */
+        .btn {
+            padding: 12px 24px; border-radius: 8px; border: none; font-weight: 800;
+            cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 0.75rem;
+        }
+        .btn-primary { background: white; color: black; }
+        .input-style {
+            width: 100%; background: #000; border: 1px solid var(--border);
+            padding: 14px; border-radius: 8px; color: white; margin-bottom: 15px; box-sizing: border-box;
+        }
 
-    if(!input.value.trim() || !uid) return;
+        @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
 
-    await push(ref(db,"chats/"+uid),{
-        texto: clean(input.value),
-        autor:"alumno",
-        fecha:Date.now()
-    });
+    <!-- ACCESO -->
+    <div id="login-screen">
+        <div class="login-card">
+            <div style="font-weight: 800; font-size: 1.5rem; margin-bottom: 5px;">S.I.G.E. <span style="color:var(--text-dim)">ALUMNO</span></div>
+            <p style="color: var(--text-dim); font-size: 0.8rem; margin-bottom: 30px;">AUTENTICACIÓN DE ASPIRANTE</p>
+            <input type="text" id="alumno_id_input" class="input-style" placeholder="Nombre de Usuario">
+            <button class="btn btn-primary" style="width: 100%;" onclick="acceder()">Iniciar Sesión</button>
+        </div>
+    </div>
 
-    input.value="";
-};
+    <!-- PANEL -->
+    <nav class="navbar" id="nav-panel" style="display: none;">
+        <div style="font-weight: 800;">S.I.G.E. <span id="dept-label" style="color:var(--text-dim)">| PORTAL</span></div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <div id="welcome-msg" style="font-size: 0.9rem; font-weight: 600;"></div>
+            <button onclick="location.reload()" class="btn" style="background: #991b1b; color: white; padding: 8px 15px;">Cerrar Sistema</button>
+        </div>
+    </nav>
 
-</script>
+    <div class="container" id="panel-alumno">
+        <div class="grid-layout">
+            <!-- IZQUIERDA: EXPEDIENTE Y NOTAS -->
+            <div class="main-col">
+                <div class="card" style="border-left: 5px solid #10b981;">
+                    <h3 style="margin-top: 0; font-size: 0.8rem; letter-spacing: 1px; color: var(--text-dim);">ORDEN DEL DÍA / OBSERVACIONES</h3>
+                    <div id="roadmap-content" style="line-height: 1.6; font-weight: 500; white-space: pre-wrap;">Consultando base de datos central...</div>
+                </div>
 
+                <div class="card">
+                    <h3 style="font-size: 0.8rem; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 25px;">HISTORIAL DE PRUEBAS Y CALIFICACIONES</h3>
+                    <div id="tasks-container"></div>
+                </div>
+            </div>
+
+            <!-- DERECHA: COMUNICACIÓN Y TIEMPO -->
+            <div class="side-col">
+                <div class="card" style="background: linear-gradient(135deg, #0f172a 0%, #000 100%); text-align: center;">
+                    <p style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim);">Siguiente Convocatoria</p>
+                    <div id="timer-display" style="font-size: 2.5rem; font-weight: 800; margin: 15px 0; font-family: 'JetBrains Mono';">--:--:--</div>
+                    <div style="font-size: 0.7rem; color: #475569;"><i class="fas fa-map-marker-alt"></i> Sede Central: Valladolid, España</div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size: 0.8rem; letter-spacing: 1px; color: var(--text-dim);"><i class="fas fa-comment-alt"></i> COMUNICACIÓN CON TRIBUNAL</h3>
+                    <div id="chat-display"></div>
+                    <div style="display: flex; gap: 8px; margin-top: 15px;">
+                        <input type="text" id="msg_input" class="input-style" style="margin: 0;" placeholder="Enviar mensaje..." onkeyup="if(event.key === 'Enter') enviarMensaje()">
+                        <button class="btn btn-primary" style="padding: 0 20px;" onclick="enviarMensaje()"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, push, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
+            authDomain: "examenes-profesoralumno.firebaseapp.com",
+            databaseURL: "https://examenes-profesoralumno-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "examenes-profesoralumno",
+            storageBucket: "examenes-profesoralumno.firebasestorage.app",
+            messagingSenderId: "503796832177",
+            appId: "1:503796832177:web:b306d6971c8ed7a9becf90"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        let currentAlumId = null;
+
+        window.acceder = async () => {
+            const id = document.getElementById('alumno_id_input').value.trim();
+            if(!id) return;
+
+            currentAlumId = id;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('nav-panel').style.display = 'flex';
+            document.getElementById('panel-alumno').style.display = 'block';
+            document.getElementById('welcome-msg').innerText = `ASPIRANTE: ${id}`;
+            
+            inicializarDatos(id);
+        };
+
+        function inicializarDatos(id) {
+            // Cargar Observaciones del Tribunal
+            onValue(ref(db, 'planificacion/' + id), (snap) => {
+                if(snap.exists()) document.getElementById('roadmap-content').innerText = snap.val().objetivos;
+                else document.getElementById('roadmap-content').innerText = "No hay observaciones registradas en su expediente.";
+            });
+
+            // Cargar Exámenes con colores por departamento
+            onValue(ref(db, 'examenes/' + id), (snap) => {
+                const container = document.getElementById('tasks-container');
+                container.innerHTML = "";
+                if(snap.exists()) {
+                    Object.values(snap.val()).reverse().forEach(t => {
+                        const dept = t.dept || 'CNP';
+                        const accent = `var(--accent-${dept.toLowerCase()})`;
+                        const nota = t.nota || '--';
+                        const notaColor = nota !== '--' ? (parseFloat(nota) >= 5 ? '#10b981' : '#ef4444') : 'white';
+
+                        container.innerHTML += `
+                            <div class="exam-item" style="border-left-color: ${accent}">
+                                <div>
+                                    <span class="dept-tag" style="background:${accent}">${dept}</span>
+                                    <div style="font-weight: 800; font-size: 1.1rem;">${t.titulo}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 5px;">
+                                        ${t.comentario ? ` <i class="fas fa-quote-left"></i> ${t.comentario}` : 'Pendiente de calificación'}
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 20px;">
+                                    ${!t.nota ? `<a href="${t.url}" target="_blank" class="btn" style="background:white; color:black;">REALIZAR</a>` : ''}
+                                    <div class="nota-box" style="color: ${notaColor}">${nota}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    container.innerHTML = "<p style='color:var(--text-dim); text-align:center;'>No se han encontrado registros en su expediente.</p>";
+                }
+            });
+
+            // Chat con el Tribunal
+            onValue(ref(db, 'chats/' + id), (snap) => {
+                const box = document.getElementById('chat-display');
+                box.innerHTML = "";
+                if(snap.exists()) {
+                    Object.values(snap.val()).forEach(m => {
+                        box.innerHTML += `<div class="msg ${m.autor === 'profesor' ? 'msg-prof' : 'msg-alum'}">${m.texto}</div>`;
+                    });
+                    box.scrollTop = box.scrollHeight;
+                }
+            });
+        }
+
+        window.enviarMensaje = async () => {
+            const input = document.getElementById('msg_input');
+            if(input.value.trim() && currentAlumId) {
+                await push(ref(db, 'chats/' + currentAlumId), {
+                    texto: input.value,
+                    autor: "alumno",
+                    fecha: Date.now()
+                });
+                input.value = "";
+            }
+        };
+
+        // Contador de Tiempo Real
+        function updateTimer() {
+            const now = new Date();
+            document.getElementById('timer-display').innerText = now.toLocaleTimeString('es-ES', { hour12: false });
+        }
+        setInterval(updateTimer, 1000); updateTimer();
+
+    </script>
 </body>
 </html>
