@@ -54,6 +54,7 @@
         .card {
             background: var(--card-bg); border-radius: 20px; padding: 30px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid var(--border);
+            margin-bottom: 20px;
         }
         .card h3 { margin-top: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
 
@@ -87,6 +88,16 @@
             padding-top: 15px; border-top: 1px solid #f1f5f9;
         }
         .input-grade { text-align: center; font-weight: 800; color: var(--accent); }
+
+        /* --- ESTILOS CHAT --- */
+        #chat-box {
+            height: 250px; overflow-y: auto; border: 1px solid var(--border); 
+            border-radius: 12px; padding: 15px; margin-bottom: 10px; 
+            background: #fdfdfd; display: flex; flex-direction: column; gap: 10px;
+        }
+        .msg { padding: 8px 12px; border-radius: 12px; max-width: 80%; font-size: 0.85rem; line-height: 1.4; }
+        .msg-prof { align-self: flex-end; background: var(--accent); color: white; }
+        .msg-alum { align-self: flex-start; background: #f1f5f9; color: var(--primary); border: 1px solid var(--border); }
 
         @media (max-width: 1000px) {
             .grid { grid-template-columns: 1fr; }
@@ -122,7 +133,6 @@
         </div>
     </div>
 
-    <!-- CONTENIDO PRINCIPAL (Oculto hasta el Login) -->
     <div id="main-content-wrapper">
         <aside class="sidebar">
             <h1><i class="fas fa-graduation-cap"></i> EduManager</h1>
@@ -141,42 +151,80 @@
             </header>
 
             <div class="grid">
-                <!-- COLUMNA ASIGNAR -->
-                <div class="card">
-                    <h3><i class="fas fa-paper-plane" style="color: var(--accent)"></i> Nueva Tarea</h3>
-                    <div class="form-group">
-                        <label>ID Alumno</label>
-                        <input type="text" id="id_alumno" placeholder="ej: ALUM-001">
-                    </div>
-                    <div class="form-group">
-                        <label>Nombre del Examen</label>
-                        <input type="text" id="titulo_examen" placeholder="ej: Examen Tema 1">
-                    </div>
-                    <div class="form-group">
-                        <label>Enlace Forms</label>
-                        <input type="url" id="url_examen" placeholder="https://forms.gle/...">
-                    </div>
-                    <button class="btn btn-primary" onclick="crearExamen()">
-                        <i class="fas fa-plus"></i> Asignar Examen
-                    </button>
-                    <div id="notif" style="display:none; margin-top:15px; text-align:center; color: var(--success); font-weight:600;">
-                        ¡Asignado correctamente!
+                <!-- COLUMNA IZQUIERDA: ASIGNAR -->
+                <div class="col-left">
+                    <div class="card">
+                        <h3><i class="fas fa-paper-plane" style="color: var(--accent)"></i> Nueva Tarea</h3>
+                        <div class="form-group">
+                            <label>ID Alumno</label>
+                            <input type="text" id="id_alumno" placeholder="ej: ALUM-001">
+                        </div>
+                        <div class="form-group">
+                            <label>Nombre del Examen</label>
+                            <input type="text" id="titulo_examen" placeholder="ej: Examen Tema 1">
+                        </div>
+                        <div class="form-group">
+                            <label>Enlace Forms</label>
+                            <input type="url" id="url_examen" placeholder="https://forms.gle/...">
+                        </div>
+                        <button class="btn btn-primary" onclick="crearExamen()">
+                            <i class="fas fa-plus"></i> Asignar Examen
+                        </button>
+                        <div id="notif" style="display:none; margin-top:15px; text-align:center; color: var(--success); font-weight:600;">
+                            ¡Asignado correctamente!
+                        </div>
                     </div>
                 </div>
 
-                <!-- COLUMNA CALIFICAR -->
-                <div class="card">
-                    <h3><i class="fas fa-clipboard-check" style="color: var(--warning)"></i> Centro de Calificaciones</h3>
-                    <div class="form-group">
-                        <div style="display: flex; gap: 10px;">
-                            <input type="text" id="search_id" placeholder="Buscar alumno por ID..." onkeyup="if(event.key === 'Enter') buscarAlumno()">
-                            <button class="btn btn-primary" style="width: 120px;" onclick="buscarAlumno()">Buscar</button>
+                <!-- COLUMNA DERECHA: CALIFICAR E INTERACCIÓN -->
+                <div class="col-right">
+                    <div class="card">
+                        <h3><i class="fas fa-clipboard-check" style="color: var(--warning)"></i> Centro de Calificaciones</h3>
+                        <div class="form-group">
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="search_id" placeholder="Buscar alumno por ID..." onkeyup="if(event.key === 'Enter') buscarAlumno()">
+                                <button class="btn btn-primary" style="width: 120px;" onclick="buscarAlumno()">Buscar</button>
+                            </div>
+                        </div>
+                        <div id="contenedorExamenes">
+                            <div style="text-align: center; padding: 40px; color: #94a3b8;">
+                                <i class="fas fa-search fa-3x" style="margin-bottom: 15px; opacity: 0.3;"></i>
+                                <p>Ingresa un ID de alumno para ver sus exámenes</p>
+                            </div>
                         </div>
                     </div>
-                    <div id="contenedorExamenes">
-                        <div style="text-align: center; padding: 40px; color: #94a3b8;">
-                            <i class="fas fa-search fa-3x" style="margin-bottom: 15px; opacity: 0.3;"></i>
-                            <p>Ingresa un ID de alumno para ver sus exámenes</p>
+
+                    <!-- PANEL DE CHAT Y RECURSOS (Se activa al buscar) -->
+                    <div class="card" id="panel-interaccion" style="display: none;">
+                        <h3><i class="fas fa-comments" style="color: var(--accent)"></i> Comunicación y Recursos</h3>
+                        
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                            <button class="btn" onclick="switchTab('chat')" id="btn-tab-chat" style="background: var(--accent); color: white; font-size: 0.8rem;">Chat</button>
+                            <button class="btn" onclick="switchTab('links')" id="btn-tab-links" style="background: #e2e8f0; font-size: 0.8rem;">Material Extra</button>
+                        </div>
+
+                        <!-- Sección Chat -->
+                        <div id="tab-chat">
+                            <div id="chat-box"></div>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="chat_input" placeholder="Escribe un mensaje..." onkeyup="if(event.key === 'Enter') enviarMensaje()">
+                                <button class="btn btn-primary" style="width: 60px;" onclick="enviarMensaje()"><i class="fas fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Sección Enlaces -->
+                        <div id="tab-links" style="display: none;">
+                            <div class="form-group">
+                                <label>Nombre del recurso</label>
+                                <input type="text" id="link_name" placeholder="ej: Guía de estudio PDF">
+                            </div>
+                            <div class="form-group">
+                                <label>URL del archivo (Drive, Dropbox...)</label>
+                                <input type="url" id="link_url" placeholder="https://...">
+                            </div>
+                            <button class="btn btn-primary" onclick="guardarEnlace()">Compartir Enlace</button>
+                            <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+                            <div id="lista-enlaces"></div>
                         </div>
                     </div>
                 </div>
@@ -201,6 +249,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        let alumnoActivo = null;
 
         // --- LÓGICA DE LOGIN ---
         window.verificarAcceso = async () => {
@@ -251,6 +300,12 @@
         window.buscarAlumno = () => {
             const id = document.getElementById('search_id').value.trim();
             if(!id) return;
+            alumnoActivo = id;
+
+            // Mostrar panel de interacción
+            document.getElementById('panel-interaccion').style.display = 'block';
+            cargarChat(id);
+            listarEnlaces(id);
 
             onValue(ref(db, 'examenes/' + id), (snapshot) => {
                 const data = snapshot.val();
@@ -297,6 +352,82 @@
             await update(ref(db, `examenes/${alumnoId}/${examenKey}`), { nota, comentario });
             alert("Nota guardada");
         };
+
+        // --- NUEVAS FUNCIONES: CHAT Y ENLACES ---
+
+        window.switchTab = (tab) => {
+            const isChat = tab === 'chat';
+            document.getElementById('tab-chat').style.display = isChat ? 'block' : 'none';
+            document.getElementById('tab-links').style.display = isChat ? 'none' : 'block';
+            
+            document.getElementById('btn-tab-chat').style.background = isChat ? 'var(--accent)' : '#e2e8f0';
+            document.getElementById('btn-tab-chat').style.color = isChat ? 'white' : 'var(--primary)';
+            document.getElementById('btn-tab-links').style.background = isChat ? '#e2e8f0' : 'var(--accent)';
+            document.getElementById('btn-tab-links').style.color = isChat ? 'var(--primary)' : 'white';
+        };
+
+        function cargarChat(id) {
+            const chatRef = ref(db, 'chats/' + id);
+            onValue(chatRef, (snapshot) => {
+                const box = document.getElementById('chat-box');
+                box.innerHTML = "";
+                const data = snapshot.val();
+                if(data) {
+                    Object.values(data).forEach(msg => {
+                        const isProf = msg.autor === "profesor";
+                        box.innerHTML += `<div class="msg ${isProf ? 'msg-prof' : 'msg-alum'}">${msg.texto}</div>`;
+                    });
+                    box.scrollTop = box.scrollHeight;
+                } else {
+                    box.innerHTML = "<p style='text-align:center; color:#94a3b8; font-size:0.8rem;'>Sin mensajes previos.</p>";
+                }
+            });
+        }
+
+        window.enviarMensaje = async () => {
+            const input = document.getElementById('chat_input');
+            if(!input.value.trim() || !alumnoActivo) return;
+            
+            await push(ref(db, 'chats/' + alumnoActivo), {
+                texto: input.value,
+                autor: "profesor",
+                fecha: Date.now()
+            });
+            input.value = "";
+        };
+
+        window.guardarEnlace = async () => {
+            const nombre = document.getElementById('link_name').value.trim();
+            const url = document.getElementById('link_url').value.trim();
+            if(!nombre || !url || !alumnoActivo) return alert("Completa los datos del recurso");
+
+            await push(ref(db, 'recursos/' + alumnoActivo), {
+                nombre: nombre,
+                url: url,
+                fecha: Date.now()
+            });
+            document.getElementById('link_name').value = "";
+            document.getElementById('link_url').value = "";
+        };
+
+        function listarEnlaces(id) {
+            onValue(ref(db, 'recursos/' + id), (snapshot) => {
+                const container = document.getElementById('lista-enlaces');
+                container.innerHTML = "";
+                const data = snapshot.val();
+                if(!data) {
+                    container.innerHTML = "<small style='color:#94a3b8'>No hay recursos compartidos.</small>";
+                    return;
+                }
+                Object.values(data).forEach(item => {
+                    container.innerHTML += `
+                        <div style="background: #f8fafc; border: 1px solid var(--border); padding: 10px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.85rem; font-weight: 600;"><i class="fas fa-link" style="color:var(--success)"></i> ${item.nombre}</span>
+                            <a href="${item.url}" target="_blank" class="btn" style="width: auto; padding: 5px 10px; background: white; border: 1px solid var(--border); font-size: 0.7rem;">Abrir</a>
+                        </div>`;
+                });
+            });
+        }
     </script>
 </body>
 </html>
