@@ -58,11 +58,11 @@
 
         .form-group { margin-bottom: 20px; text-align: left; }
         label { display: block; font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 8px; text-transform: uppercase; }
-        input {
+        input, textarea {
             width: 100%; padding: 12px 16px; border: 1px solid var(--border);
             border-radius: 12px; font-family: inherit; font-size: 0.95rem; box-sizing: border-box;
         }
-        input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+        input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
 
         .btn {
             width: 100%; padding: 14px; border-radius: 12px; border: none;
@@ -96,7 +96,6 @@
         .msg-prof { align-self: flex-end; background: var(--accent); color: white; }
         .msg-alum { align-self: flex-start; background: #f1f5f9; color: var(--primary); border: 1px solid var(--border); }
 
-        /* Estilos específicos para las nuevas funciones */
         .alum-item {
             display: flex; justify-content: space-between; align-items: center;
             padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem;
@@ -119,7 +118,6 @@
             <i class="fas fa-user-shield fa-3x" style="color: var(--accent); margin-bottom: 20px;"></i>
             <h2 style="margin-bottom: 10px;">Panel Administrativo</h2>
             <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 25px;">Introduce tus credenciales de profesor</p>
-            
             <div class="form-group">
                 <label>Usuario</label>
                 <input type="text" id="user_login" placeholder="Nombre de usuario">
@@ -128,7 +126,6 @@
                 <label>Contraseña</label>
                 <input type="password" id="pass_login" placeholder="••••••••">
             </div>
-            
             <button class="btn btn-primary" onclick="verificarAcceso()">
                 <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
             </button>
@@ -192,6 +189,22 @@
 
                 <!-- COLUMNA DERECHA: CALIFICAR E INTERACCIÓN -->
                 <div class="col-right">
+                    <!-- WIDGET CUENTA ATRÁS OPOSICIONES -->
+                    <div class="card" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border: none;">
+                        <h3 style="color: #94a3b8; font-size: 0.8rem;"><i class="fas fa-stopwatch"></i> TIEMPO HASTA LA CONVOCATORIA</h3>
+                        <div style="display: flex; justify-content: space-around; text-align: center; margin-top: 10px;">
+                            <div>
+                                <div id="days-left" style="font-size: 1.8rem; font-weight: 800; color: #3b82f6;">--</div>
+                                <div style="font-size: 0.6rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px;">Días</div>
+                            </div>
+                            <div>
+                                <div id="hours-left" style="font-size: 1.8rem; font-weight: 800; color: #f8fafc;">--</div>
+                                <div style="font-size: 0.6rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px;">Horas</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.7rem; margin-top: 15px; opacity: 0.5; text-align: center;">Referencia España</p>
+                    </div>
+
                     <div class="card">
                         <h3><i class="fas fa-clipboard-check" style="color: var(--warning)"></i> Centro de Calificaciones</h3>
                         <div class="form-group">
@@ -201,7 +214,6 @@
                             </div>
                         </div>
                         
-                        <!-- MÉTRICAS DE RENDIMIENTO (Se llenan al buscar) -->
                         <div id="stats-container" class="hidden" style="display: flex; justify-content: space-around; background: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border);">
                             <div style="text-align: center;">
                                 <small style="color: #64748b;">Promedio</small>
@@ -227,10 +239,11 @@
                     </div>
 
                     <div class="card" id="panel-interaccion" style="display: none;">
-                        <h3><i class="fas fa-comments" style="color: var(--accent)"></i> Comunicación y Recursos</h3>
+                        <h3><i class="fas fa-comments" style="color: var(--accent)"></i> Seguimiento y Tutoría</h3>
                         <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                             <button class="btn" onclick="switchTab('chat')" id="btn-tab-chat" style="background: var(--accent); color: white; font-size: 0.8rem;">Chat</button>
-                            <button class="btn" onclick="switchTab('links')" id="btn-tab-links" style="background: #e2e8f0; font-size: 0.8rem;">Material Extra</button>
+                            <button class="btn" onclick="switchTab('plan')" id="btn-tab-plan" style="background: #e2e8f0; font-size: 0.8rem;">Planificación</button>
+                            <button class="btn" onclick="switchTab('links')" id="btn-tab-links" style="background: #e2e8f0; font-size: 0.8rem;">Material</button>
                         </div>
 
                         <div id="tab-chat">
@@ -241,13 +254,22 @@
                             </div>
                         </div>
 
+                        <div id="tab-plan" style="display: none;">
+                            <div class="form-group">
+                                <label>Objetivos Semanales / Hoja de Ruta</label>
+                                <textarea id="plan_text" rows="5" placeholder="Ej: Estudiar Temas 5-8..."></textarea>
+                            </div>
+                            <button class="btn btn-primary" onclick="guardarPlanificacion()">Asignar Planificación</button>
+                            <div id="plan-status" style="margin-top: 10px; font-size: 0.8rem; color: var(--success); display: none; text-align: center;">¡Plan actualizado!</div>
+                        </div>
+
                         <div id="tab-links" style="display: none;">
                             <div class="form-group">
                                 <label>Nombre del recurso</label>
                                 <input type="text" id="link_name" placeholder="ej: Guía de estudio PDF">
                             </div>
                             <div class="form-group">
-                                <label>URL del archivo (Drive, Dropbox...)</label>
+                                <label>URL del archivo</label>
                                 <input type="url" id="link_url" placeholder="https://...">
                             </div>
                             <button class="btn btn-primary" onclick="guardarEnlace()">Compartir Enlace</button>
@@ -258,7 +280,7 @@
                 </div>
             </div>
 
-            <!-- GESTIÓN DE ALUMNOS (NUEVO PANEL) -->
+            <!-- GESTIÓN DE ALUMNOS -->
             <div class="card" style="margin-top: 30px;">
                 <h3><i class="fas fa-users" style="color: var(--accent)"></i> Gestión de la Clase</h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
@@ -272,9 +294,7 @@
                     </div>
                     <div>
                         <label>Lista de Estudiantes Activos</label>
-                        <div id="lista-alumnos-registrados" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; margin-top: 10px;">
-                            <!-- Dinámico -->
-                        </div>
+                        <div id="lista-alumnos-registrados" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; margin-top: 10px;"></div>
                     </div>
                 </div>
             </div>
@@ -304,63 +324,23 @@
         window.verificarAcceso = async () => {
             const u = document.getElementById('user_login').value.trim();
             const p = document.getElementById('pass_login').value.trim();
-            const errorMsg = document.getElementById('error-login');
-            try {
-                const snapshot = await get(ref(db, 'config/admin'));
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    if (u === data.usuario && p === data.password) {
-                        document.getElementById('login-overlay').style.display = 'none';
-                        document.getElementById('main-content-wrapper').style.display = 'block';
-                    } else { errorMsg.style.display = 'block'; }
-                }
-            } catch (e) { alert("Error de conexión"); }
+            const snapshot = await get(ref(db, 'config/admin'));
+            if (snapshot.exists() && u === snapshot.val().usuario && p === snapshot.val().password) {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('main-content-wrapper').style.display = 'block';
+            } else { document.getElementById('error-login').style.display = 'block'; }
         };
 
-        // --- GESTIÓN DE ALUMNOS (NUEVO) ---
-        window.registrarAlumno = async () => {
-            const nombre = document.getElementById('new_alum_name').value.trim();
-            const id = document.getElementById('new_alum_id').value.trim();
-            if(!nombre || !id) return alert("Rellena todos los campos");
-            await set(ref(db, 'estudiantes_registrados/' + id), { nombre, fecha: Date.now() });
-            await set(ref(db, 'alumnos/' + id), { activo: true });
-            document.getElementById('new_alum_name').value = "";
-            document.getElementById('new_alum_id').value = "";
-        };
+        // --- CUENTA ATRÁS ---
+        function actualizarCuentaAtras() {
+            const fechaExamen = new Date("June 15, 2026 09:00:00").getTime();
+            const diferencia = fechaExamen - new Date().getTime();
+            document.getElementById("days-left").innerText = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+            document.getElementById("hours-left").innerText = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        }
+        setInterval(actualizarCuentaAtras, 60000); actualizarCuentaAtras();
 
-        onValue(ref(db, 'estudiantes_registrados'), (snapshot) => {
-            const list = document.getElementById('lista-alumnos-registrados');
-            list.innerHTML = "";
-            const data = snapshot.val();
-            if(data) {
-                Object.entries(data).forEach(([id, info]) => {
-                    list.innerHTML += `
-                        <div class="alum-item">
-                            <span><strong>${id}</strong> - ${info.nombre}</span>
-                            <i class="fas fa-trash btn-delete" onclick="eliminarAlumno('${id}')"></i>
-                        </div>`;
-                });
-            }
-        });
-
-        window.eliminarAlumno = async (id) => {
-            if(confirm(`¿Eliminar a ${id}? Se perderán sus notas.`)) {
-                await remove(ref(db, 'estudiantes_registrados/' + id));
-                await remove(ref(db, 'alumnos/' + id));
-                await remove(ref(db, 'examenes/' + id));
-            }
-        };
-
-        // --- ANUNCIOS (NUEVO) ---
-        window.publicarAnuncio = async () => {
-            const texto = document.getElementById('global_announcement').value.trim();
-            if(!texto) return;
-            await set(ref(db, 'config/anuncio_global'), { texto, fecha: Date.now() });
-            alert("Anuncio publicado para todos los alumnos");
-            document.getElementById('global_announcement').value = "";
-        };
-
-        // --- BUSCAR Y MÉTRICAS (ACTUALIZADO) ---
+        // --- BUSCAR Y MÉTRICAS ---
         window.buscarAlumno = () => {
             const id = document.getElementById('search_id').value.trim();
             if(!id) return;
@@ -368,40 +348,26 @@
             document.getElementById('panel-interaccion').style.display = 'block';
             cargarChat(id);
             listarEnlaces(id);
+            cargarPlanificacion(id);
 
             onValue(ref(db, 'examenes/' + id), (snapshot) => {
                 const data = snapshot.val();
                 const container = document.getElementById('contenedorExamenes');
                 const stats = document.getElementById('stats-container');
                 container.innerHTML = "";
-
-                if(!data) {
-                    container.innerHTML = `<p style="text-align:center; color:#ef4444; padding:20px;">No hay registros para: ${id}</p>`;
-                    stats.classList.add('hidden');
-                    return;
-                }
-
+                if(!data) { stats.classList.add('hidden'); return; }
                 stats.classList.remove('hidden');
                 let suma = 0, cont = 0;
-
                 Object.entries(data).forEach(([key, ex]) => {
-                    const graded = ex.nota !== undefined;
-                    if(graded) { suma += parseFloat(ex.nota); cont++; }
-                    const div = document.createElement('div');
-                    div.className = 'exam-card';
-                    div.innerHTML = `
-                        <div class="exam-info">
-                            <div><h4 style="margin:5px 0;">${ex.titulo}</h4></div>
-                            <span class="status-badge ${graded ? 'status-graded' : 'status-pending'}">${graded ? 'Calificado' : 'Pendiente'}</span>
-                        </div>
+                    if(ex.nota !== undefined) { suma += parseFloat(ex.nota); cont++; }
+                    container.innerHTML += `<div class="exam-card">
+                        <div class="exam-info"><h4>${ex.titulo}</h4><span class="status-badge ${ex.nota ? 'status-graded' : 'status-pending'}">${ex.nota ? 'Calificado' : 'Pendiente'}</span></div>
                         <div class="grade-controls">
-                            <input type="number" class="input-grade" id="n_${key}" value="${ex.nota || ''}" placeholder="Nota">
-                            <input type="text" id="c_${key}" value="${ex.comentario || ''}" placeholder="Comentario...">
-                            <button class="btn btn-primary" style="padding:10px" onclick="guardarNota('${id}', '${key}')"><i class="fas fa-save"></i></button>
-                        </div>`;
-                    container.appendChild(div);
+                            <input type="number" class="input-grade" id="n_${key}" value="${ex.nota || ''}">
+                            <input type="text" id="c_${key}" value="${ex.comentario || ''}" placeholder="Comentario">
+                            <button class="btn btn-primary" onclick="guardarNota('${id}', '${key}')"><i class="fas fa-save"></i></button>
+                        </div></div>`;
                 });
-
                 const prom = cont > 0 ? (suma / cont).toFixed(1) : 0;
                 document.getElementById('avg-grade').innerText = prom;
                 document.getElementById('total-tasks').innerText = Object.keys(data).length;
@@ -409,74 +375,73 @@
             });
         };
 
-        // --- TAREAS Y NOTAS ---
-        window.crearExamen = async () => {
-            const id = document.getElementById('id_alumno').value.trim();
-            const titulo = document.getElementById('titulo_examen').value.trim();
-            const url = document.getElementById('url_examen').value.trim();
-            if(!id || !titulo || !url) return alert("Completa todos los campos");
-            await push(ref(db, 'examenes/' + id), { titulo, url, fecha: new Date().toISOString() });
-            document.getElementById('notif').style.display = 'block';
-            setTimeout(() => document.getElementById('notif').style.display = 'none', 3000);
+        // --- PLANIFICACIÓN ---
+        window.guardarPlanificacion = async () => {
+            const texto = document.getElementById('plan_text').value.trim();
+            if(!alumnoActivo) return;
+            await set(ref(db, 'planificacion/' + alumnoActivo), { objetivos: texto, fecha: Date.now() });
+            document.getElementById('plan-status').style.display = 'block';
+            setTimeout(() => document.getElementById('plan-status').style.display = 'none', 2000);
         };
 
-        window.guardarNota = async (alumnoId, examenKey) => {
-            const nota = document.getElementById(`n_${examenKey}`).value;
-            const comentario = document.getElementById(`c_${examenKey}`).value;
-            if(nota === "") return alert("Falta la nota");
-            await update(ref(db, `examenes/${alumnoId}/${examenKey}`), { nota, comentario });
-            alert("Nota guardada");
+        async function cargarPlanificacion(id) {
+            const snap = await get(ref(db, 'planificacion/' + id));
+            document.getElementById('plan_text').value = snap.exists() ? snap.val().objetivos : "";
+        }
+
+        // --- GESTIÓN DE ALUMNOS, CHAT Y ENLACES ---
+        window.registrarAlumno = async () => {
+            const n = document.getElementById('new_alum_name').value.trim();
+            const id = document.getElementById('new_alum_id').value.trim();
+            if(n && id) { await set(ref(db, 'estudiantes_registrados/' + id), { nombre: n }); await set(ref(db, 'alumnos/' + id), { activo: true }); }
         };
 
-        // --- COMUNICACIÓN ---
+        onValue(ref(db, 'estudiantes_registrados'), (snapshot) => {
+            const list = document.getElementById('lista-alumnos-registrados');
+            list.innerHTML = "";
+            if(snapshot.exists()) Object.entries(snapshot.val()).forEach(([id, info]) => {
+                list.innerHTML += `<div class="alum-item"><span>${id} - ${info.nombre}</span><i class="fas fa-trash btn-delete" onclick="eliminarAlumno('${id}')"></i></div>`;
+            });
+        });
+
+        window.eliminarAlumno = async (id) => { if(confirm("¿Eliminar?")) await remove(ref(db, 'estudiantes_registrados/' + id)); };
+        window.publicarAnuncio = async () => { await set(ref(db, 'config/anuncio_global'), { texto: document.getElementById('global_announcement').value }); alert("Publicado"); };
+        window.crearExamen = async () => { 
+            const id = document.getElementById('id_alumno').value;
+            await push(ref(db, 'examenes/' + id), { titulo: document.getElementById('titulo_examen').value, url: document.getElementById('url_examen').value });
+            document.getElementById('notif').style.display='block';
+        };
+        window.guardarNota = async (a, e) => { await update(ref(db, `examenes/${a}/${e}`), { nota: document.getElementById(`n_${e}`).value, comentario: document.getElementById(`c_${e}`).value }); alert("Nota guardada"); };
+        
         window.switchTab = (tab) => {
-            const isChat = tab === 'chat';
-            document.getElementById('tab-chat').style.display = isChat ? 'block' : 'none';
-            document.getElementById('tab-links').style.display = isChat ? 'none' : 'block';
-            document.getElementById('btn-tab-chat').style.background = isChat ? 'var(--accent)' : '#e2e8f0';
-            document.getElementById('btn-tab-links').style.background = isChat ? '#e2e8f0' : 'var(--accent)';
+            ['chat', 'links', 'plan'].forEach(t => {
+                document.getElementById(`tab-${t}`).style.display = t === tab ? 'block' : 'none';
+                document.getElementById(`btn-tab-${t}`).style.background = t === tab ? 'var(--accent)' : '#e2e8f0';
+                document.getElementById(`btn-tab-${t}`).style.color = t === tab ? 'white' : 'var(--primary)';
+            });
         };
 
         function cargarChat(id) {
-            onValue(ref(db, 'chats/' + id), (snapshot) => {
-                const box = document.getElementById('chat-box');
-                box.innerHTML = "";
-                const data = snapshot.val();
-                if(data) {
-                    Object.values(data).forEach(msg => {
-                        const isProf = msg.autor === "profesor";
-                        box.innerHTML += `<div class="msg ${isProf ? 'msg-prof' : 'msg-alum'}">${msg.texto}</div>`;
-                    });
-                    box.scrollTop = box.scrollHeight;
-                }
+            onValue(ref(db, 'chats/' + id), (snap) => {
+                const box = document.getElementById('chat-box'); box.innerHTML = "";
+                if(snap.exists()) Object.values(snap.val()).forEach(m => { box.innerHTML += `<div class="msg ${m.autor==='profesor'?'msg-prof':'msg-alum'}">${m.texto}</div>`; });
+                box.scrollTop = box.scrollHeight;
             });
         }
 
         window.enviarMensaje = async () => {
             const input = document.getElementById('chat_input');
-            if(!input.value.trim() || !alumnoActivo) return;
-            await push(ref(db, 'chats/' + alumnoActivo), { texto: input.value, autor: "profesor", fecha: Date.now() });
-            input.value = "";
+            if(input.value && alumnoActivo) { await push(ref(db, 'chats/' + alumnoActivo), { texto: input.value, autor: "profesor" }); input.value = ""; }
         };
 
         window.guardarEnlace = async () => {
-            const nombre = document.getElementById('link_name').value.trim();
-            const url = document.getElementById('link_url').value.trim();
-            if(!nombre || !url || !alumnoActivo) return alert("Completa los datos");
-            await push(ref(db, 'recursos/' + alumnoActivo), { nombre, url, fecha: Date.now() });
-            document.getElementById('link_name').value = ""; document.getElementById('link_url').value = "";
+            await push(ref(db, 'recursos/' + alumnoActivo), { nombre: document.getElementById('link_name').value, url: document.getElementById('link_url').value });
         };
 
         function listarEnlaces(id) {
-            onValue(ref(db, 'recursos/' + id), (snapshot) => {
-                const container = document.getElementById('lista-enlaces');
-                container.innerHTML = "";
-                const data = snapshot.val();
-                if(data) {
-                    Object.values(data).forEach(item => {
-                        container.innerHTML += `<div style="background: #f8fafc; border: 1px solid var(--border); padding: 10px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;"><span style="font-size: 0.85rem; font-weight: 600;"><i class="fas fa-link" style="color:var(--success)"></i> ${item.nombre}</span><a href="${item.url}" target="_blank" class="btn" style="width: auto; padding: 5px 10px; background: white; border: 1px solid var(--border); font-size: 0.7rem;">Abrir</a></div>`;
-                    });
-                }
+            onValue(ref(db, 'recursos/' + id), (snap) => {
+                const list = document.getElementById('lista-enlaces'); list.innerHTML = "";
+                if(snap.exists()) Object.values(snap.val()).forEach(i => { list.innerHTML += `<div style="background:#f8fafc; padding:10px; margin-bottom:5px; border-radius:8px; display:flex; justify-content:space-between;"><span>${i.nombre}</span><a href="${i.url}" target="_blank">Abrir</a></div>`; });
             });
         }
     </script>
