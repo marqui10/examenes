@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Admin - PAU</title>
+    <!-- Scripts corregidos para evitar errores de carga local -->
+    <script src="https://cloudflare.com"></script>
+    <script src="https://cloudflare.com"></script>
+</head>
+<body style="font-family: sans-serif; padding: 20px; background: #fdf2f2;">
+    <h2>Enviar Formulario al Alumno</h2>
+    <div style="background:white; padding:20px; border-radius:10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width:400px;">
+        <input type="text" id="idAlumno" placeholder="ID del Alumno" style="width:90%; padding:10px; margin-bottom:10px;"><br>
+        <input type="url" id="linkForm" placeholder="URL de Google Forms" style="width:90%; padding:10px; margin-bottom:10px;"><br>
+        <button onclick="enviarExamen()" style="width:96%; padding:10px; background:#d9534f; color:white; border:none; cursor:pointer; font-weight:bold;">SUBIR EXAMEN</button>
+        <p id="msg" style="margin-top:15px; font-weight:bold;"></p>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
+            authDomain: "://firebaseapp.com",
+            databaseURL: "https://firebasedatabase.app",
+            projectId: "examenes-profesoralumno",
+            storageBucket: "examenes-profesoralumno.firebasestorage.app",
+            messagingSenderId: "503796832177",
+            appId: "1:503796832177:web:b306d6971c8ed7a9becf90"
+        };
+
+        // Inicializamos con precaución
+        var db;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            console.log("Conectado a Firebase");
+        } catch (e) {
+            console.error("Error al inicializar Firebase:", e);
+        }
+
+        function enviarExamen() {
+            const id = document.getElementById('idAlumno').value;
+            const url = document.getElementById('linkForm').value;
+            const msg = document.getElementById('msg');
+
+            if (!db) {
+                alert("Las librerías de Firebase no han cargado. Revisa tu conexión.");
+                return;
+            }
+
+            if(!id || !url) return alert("Completa los campos");
+
+            msg.style.color = "blue";
+            msg.innerText = "Enviando...";
+
+            db.ref('examenes/' + id).set({ url: url })
+                .then(() => {
+                    msg.style.color = "green";
+                    msg.innerText = "✅ ¡Enviado con éxito!";
+                })
+                .catch(err => {
+                    msg.style.color = "red";
+                    msg.innerText = "❌ Error: " + err.message;
+                });
+        }
+    </script>
+</body>
+</html>
