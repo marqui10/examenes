@@ -333,7 +333,7 @@
 
         // --- CUENTA ATRÁS ---
         function actualizarCuentaAtras() {
-            const fechaExamen = new Date("June 15, 2026 09:00:00").getTime();
+            const fechaExamen = new Date("April 2, 2026 16:50:00").getTime();
             const diferencia = fechaExamen - new Date().getTime();
             document.getElementById("days-left").innerText = Math.floor(diferencia / (1000 * 60 * 60 * 24));
             document.getElementById("hours-left").innerText = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
