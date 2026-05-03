@@ -23,7 +23,7 @@
 
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; background: var(--primary); color: var(--text-main);
-            margin: 0; display: flex; height: 100vh; overflow: hidden;
+            margin: 0; display: flex; flex-direction: column; height: 100vh; overflow-x: hidden;
         }
 
         /* --- LOGIN OVERLAY --- */
@@ -37,23 +37,9 @@
             width: 100%; max-width: 350px; text-align: center;
         }
 
-        /* --- SIDEBAR --- */
-        .sidebar {
-            width: 260px; background: #000; border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; padding: 20px;
-        }
-        .logo-area { padding: 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
-        .logo-area h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: -1px; margin: 0; }
-        
-        .dept-btn {
-            display: flex; align-items: center; gap: 12px; padding: 12px;
-            border-radius: 8px; cursor: pointer; transition: 0.2s; margin-bottom: 5px;
-            font-weight: 600; font-size: 0.85rem; color: var(--text-dim);
-        }
-        .dept-btn:hover { background: rgba(255,255,255,0.05); color: white; }
-
         /* --- MAIN CONTENT --- */
         .main-view { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        
         .top-nav {
             padding: 15px 40px; background: rgba(5, 7, 10, 0.9); backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
@@ -82,6 +68,10 @@
         .exam-row {
             background: #000; border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 10px;
         }
+
+        @media (max-width: 900px) {
+            .grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -95,34 +85,17 @@
             <button class="btn btn-discord" onclick="loginDiscord()">
                 <i class="fab fa-discord"></i> Entrar como Administrador
             </button>
-            
-            <div style="margin: 15px 0; color: var(--text-dim); font-size: 0.6rem;">O ACCESO DE EMERGENCIA</div>
-            <input type="password" id="emergency_pass" placeholder="Clave Maestra" style="text-align: center;">
-            <button class="btn btn-primary" onclick="accesoManual()">Validar</button>
         </div>
     </div>
 
-    <!-- PANEL PRINCIPAL -->
-    <aside class="sidebar">
-        <div class="logo-area">
-            <h1>S.I.G.E. <span style="color: var(--text-dim);">3.0</span></h1>
-            <small style="color: #475569; font-size: 0.6rem;">ADMINISTRACIÓN CENTRAL</small>
-        </div>
-        
-        <div class="dept-btn" onclick="filterDept('CNP')"><i class="fas fa-shield-alt" style="color: var(--accent-cnp)"></i> CNP</div>
-        <div class="dept-btn" onclick="filterDept('GC')"><i class="fas fa-bullseye" style="color: var(--accent-gc)"></i> Guardia Civil</div>
-        <div class="dept-btn" onclick="filterDept('BOMBEROS')"><i class="fas fa-fire-extinguisher" style="color: var(--accent-fire)"></i> Bomberos</div>
-        <div class="dept-btn" onclick="filterDept('SANITARIOS')"><i class="fas fa-heartbeat" style="color: var(--accent-ems)"></i> Sanitarios</div>
-        <div class="dept-btn" onclick="filterDept('DGT')"><i class="fas fa-car" style="color: var(--accent-dgt)"></i> DGT</div>
-
-        <div style="margin-top: auto; padding: 10px; font-size: 0.7rem; color: #475569;">
-            <i class="fas fa-clock"></i> <span id="clock">--:--:--</span>
-        </div>
-    </aside>
-
     <div class="main-view">
         <nav class="top-nav">
-            <div id="dept-title" style="font-weight: 800; text-transform: uppercase;">PANEL DE CONTROL ESTATAL</div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="font-weight: 800; font-size: 1.2rem;">S.I.G.E. <span style="color: var(--text-dim);">3.0</span></div>
+                <div style="font-size: 0.7rem; color: #475569; border-left: 1px solid var(--border); padding-left: 20px;">
+                    <i class="fas fa-clock"></i> <span id="clock">--:--:--</span>
+                </div>
+            </div>
             <div style="display: flex; gap: 10px;">
                 <input type="text" id="search_id" placeholder="ID Discord del Alumno..." style="width: 250px; margin:0;">
                 <button class="btn btn-primary" style="width: auto;" onclick="buscarAlumno()">CARGAR EXPEDIENTE</button>
@@ -154,14 +127,16 @@
                             <input type="text" id="new_alum_id" placeholder="ID Discord" style="width: 100px;">
                             <button class="btn btn-primary" style="width: 45px;" onclick="registrarAlumno()">+</button>
                         </div>
-                        <div id="lista-censo" style="margin-top: 15px; max-height: 200px; overflow-y: auto;"></div>
+                        <div id="lista-censo" style="margin-top: 15px; max-height: 300px; overflow-y: auto;"></div>
                     </div>
                 </div>
 
                 <div class="right-col">
                     <div class="card">
                         <h3>Calificaciones y Veredictos</h3>
-                        <div id="contenedorExamenes"></div>
+                        <div id="contenedorExamenes">
+                            <p style="color:var(--text-dim); text-align:center; font-size:0.8rem;">Cargue un expediente para ver las pruebas.</p>
+                        </div>
                     </div>
 
                     <div class="card" id="panel-obs" style="display:none;">
@@ -178,7 +153,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, push, update, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Mismos datos que el Portal del Aspirante
         const firebaseConfig = {
             apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
             authDomain: "examenes-profesoralumno.firebaseapp.com",
@@ -195,7 +169,6 @@
         const CLIENT_ID = '1500201403484737616';
         const REDIRECT_URI = window.location.origin + window.location.pathname;
 
-        // --- LÓGICA DE ACCESO DISCORD ---
         window.loginDiscord = () => {
             const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
             window.location.href = url;
@@ -207,23 +180,21 @@
             const token = params.get('access_token');
 
             if (token) {
-                document.getElementById('status-msg').innerText = "Verificando Rango en Base de Datos...";
+                document.getElementById('status-msg').innerText = "Verificando Rango...";
                 const res = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${token}` } });
                 const user = await res.json();
                 
-                // RESTRICCIÓN: Solo si está en config/admins_autorizados
                 const adminSnap = await get(ref(db, 'config/admins_autorizados/' + user.username));
                 
                 if (adminSnap.exists() && adminSnap.val().activo === true) {
                     window.history.replaceState({}, document.title, window.location.pathname);
                     document.getElementById('login-overlay').style.display = 'none';
                 } else {
-                    document.getElementById('status-msg').innerHTML = `<span style="color:#ef4444">ACCESO DENEGADO: ${user.username} no es Admin.</span>`;
+                    document.getElementById('status-msg').innerHTML = `<span style="color:#ef4444">ACCESO DENEGADO: ${user.username}</span>`;
                 }
             }
         }
 
-        // --- GESTIÓN ---
         window.buscarAlumno = () => {
             const id = document.getElementById('search_id').value.trim();
             if(!id) return;
@@ -247,6 +218,8 @@
                                 </div>
                             </div>`;
                     });
+                } else {
+                    container.innerHTML = "<p style='color:var(--text-dim); text-align:center;'>Sin exámenes registrados.</p>";
                 }
             });
 
@@ -260,11 +233,12 @@
                 nota: document.getElementById(`n_${eid}`).value,
                 comentario: document.getElementById(`c_${eid}`).value
             });
-            alert("CALIFICACIÓN GUARDADA");
+            alert("CALIFICACIÓN ACTUALIZADA");
         };
 
         window.crearExamen = async () => {
             const id = document.getElementById('id_alumno').value;
+            if(!id) return alert("Inserte ID de Alumno");
             await push(ref(db, 'examenes/' + id), {
                 titulo: document.getElementById('titulo_examen').value,
                 url: document.getElementById('url_examen').value,
@@ -275,6 +249,7 @@
 
         window.registrarAlumno = () => {
             const id = document.getElementById('new_alum_id').value;
+            if(!id) return;
             set(ref(db, 'estudiantes_registrados/' + id), { nombre: document.getElementById('new_alum_name').value });
         };
 
@@ -282,7 +257,7 @@
             const list = document.getElementById('lista-censo');
             list.innerHTML = "";
             if(snap.exists()) Object.entries(snap.val()).forEach(([id, info]) => {
-                list.innerHTML += `<div style="font-size:0.7rem; padding:5px; border-bottom:1px solid var(--border)">${info.nombre} (@${id})</div>`;
+                list.innerHTML += `<div style="font-size:0.75rem; padding:8px; border-bottom:1px solid var(--border)">${info.nombre} <span style="color:var(--text-dim)">(@${id})</span></div>`;
             });
         });
 
@@ -290,11 +265,6 @@
             const id = document.getElementById('search_id').value;
             set(ref(db, 'planificacion/' + id), { objetivos: document.getElementById('obs_text').value });
             alert("EXPEDIENTE ACTUALIZADO");
-        };
-
-        window.filterDept = (d) => {
-            document.getElementById('dept-title').innerText = "CENTRO DE MANDO: " + d;
-            document.getElementById('reg_dept').value = d;
         };
 
         setInterval(() => {
