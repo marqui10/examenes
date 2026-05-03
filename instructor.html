@@ -239,81 +239,51 @@
 
         </main>
     </div>
+<script>
 
-    <script>
-        // CONFIGURACIÓN FIREBASE
+// CONFIGURACIÓN FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
-            authDomain: "examenes-profesoralumno.firebaseapp.com",
             databaseURL: "https://examenes-profesoralumno-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "examenes-profesoralumno",
-            storageBucket: "examenes-profesoralumno.firebasestorage.app",
-            messagingSenderId: "503796832177",
-            appId: "1:503796832177:web:b306d6971c8ed7a9becf90",
-            measurementId: "G-2662GS0WE7"
+            projectId: "examenes-profesoralumno"
         };
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
         const db = firebase.database();
 
-        // AUTH CON DISCORD
-   function loginPorID() {
-    const idIntroducida = document.getElementById('input-id-discord').value;
-
-    // Buscamos directamente en la base de datos sin pasar por Auth de Google
-    db.ref(`instructor/${idIntroducida}`).once('value', snapshot => {
-        const data = snapshot.val();
-        
-        if (data) {
-            // ¡Éxito! Guardamos el ID en la sesión del navegador (Local Storage)
-            localStorage.setItem('user_discord_id', idIntroducida);
-            entrarAlPanel(data);
-        } else {
-            alert("Tu ID no está registrada en la base de datos.");
-        }
-    });
-}
-
-        function logout() {
-            auth.signOut().then(() => location.reload());
-        }
-
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                checkAccess(user);
-            }
-        });
-
-        // CONTROL DE ACCESO SEGÚN MEMORIA (instructor/id/cuerpo)
-        function checkAccess(user) {
-            db.ref(`instructor/${user.uid}`).once('value', snapshot => {
+        // 1. FUNCIÓN DE LOGIN POR ID (SIN MEMORIA)
+        function loginPorID() {
+            const idIntroducida = document.getElementById('input-id-discord').value.trim();
+            if (!idIntroducida) return alert("Introduce una ID válida");
+            
+            // Buscamos directamente en la base de datos
+            db.ref(`instructor/${idIntroducida}`).once('value', snapshot => {
                 const data = snapshot.val();
-                if (!data) {
-                    alert("No tienes permiso de acceso al panel de instructor.");
-                    logout();
-                    return;
-                }
-
-                // Si es admin total o tiene alguna ID válida
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-container').style.display = 'flex';
-                document.getElementById('user-name').innerText = user.displayName;
-                document.getElementById('user-avatar').src = user.photoURL;
-                document.getElementById('user-avatar').style.display = 'block';
-                
-                if (data.admin) {
-                    document.getElementById('user-role').innerText = "ADMINISTRADOR TOTAL";
+                if (data) {
+                    // Éxito: Entramos pero NO guardamos nada en localStorage
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('main-container').style.display = 'flex';
+                    document.getElementById('user-name-display').innerText = data.nombre || "Instructor";
+                    
+                    if(data.admin) {
+                        document.getElementById('user-role').innerText = "ADMINISTRADOR TOTAL";
+                    } else {
+                        document.getElementById('user-role').innerText = "Instructor Autorizado";
+                    }
                 } else {
-                    document.getElementById('user-role').innerText = "Instructor Autorizado";
+                    alert("ID no encontrada en la base de datos.");
                 }
             });
+        }
+
+        // 2. LOGOUT (Simplemente recarga para limpiar el estado actual)
+        function logout() {
+            location.reload();
         }
 
         // NAVEGACIÓN
         function showSection(section) {
             const adminSec = document.getElementById('sec-admin');
             const cuerpoSec = document.getElementById('sec-cuerpo');
-            
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
 
             if (section === 'admin') {
@@ -323,50 +293,40 @@
                 adminSec.classList.add('hidden');
                 cuerpoSec.classList.remove('hidden');
                 document.getElementById('cuerpo-titulo').innerText = "Gestión: " + section.toUpperCase();
-                // Aquí podrías filtrar los datos de Firebase por el cuerpo seleccionado
             }
         }
 
         // FUNCIONES DE BASE DE DATOS
         function enviarAviso() {
             const txt = document.getElementById('aviso-texto').value;
-            if(!txt) return;
             db.ref('avisos/actual').set({
                 mensaje: txt,
                 fecha: new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' })
-            }).then(() => alert("Aviso global enviado. Son las " + new Date().toLocaleTimeString('es-ES') + " en España."));
+            }).then(() => alert("Aviso enviado"));
         }
 
         function registrarOpositor() {
             const id = document.getElementById('reg-id').value;
             const cuerpo = document.getElementById('reg-cuerpo').value;
             const nombre = document.getElementById('reg-nombre').value;
-
-            if(!id || !nombre) return;
-
             db.ref(`instructor/${id}/${cuerpo}`).set({
                 nombre: nombre,
                 activo: true
-            }).then(() => alert("Opositor registrado con éxito."));
+            }).then(() => alert("Opositor registrado"));
         }
 
         function mandarExamen() {
             const opositor = document.getElementById('ex-user').value;
             const nombre = document.getElementById('ex-nombre').value;
             const url = document.getElementById('ex-url').value;
-
             db.ref(`examenes_enviados/${opositor}`).push({
                 nombre: nombre,
                 url: url,
                 fecha: new Date().toISOString()
-            }).then(() => alert("Examen enviado al opositor."));
+            }).then(() => alert("Examen enviado"));
         }
 
         function buscarExpediente() {
-            const user = document.getElementById('search-user').value;
-            if(!user) return;
-            
-            // Simulación de carga de datos
             document.getElementById('expediente-resultado').classList.remove('hidden');
         }
     </script>
