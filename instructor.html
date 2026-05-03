@@ -60,7 +60,6 @@
         /* Layout Principal */
         #main-container { display: none; width: 100%; height: 100%; }
 
-        /* Sidebar */
         aside {
             width: 260px;
             background-color: var(--sidebar-bg);
@@ -86,7 +85,6 @@
         .nav-item:hover { background: #334155; }
         .nav-item.active { background: var(--accent); }
 
-        /* Contenido */
         main { flex-grow: 1; padding: 30px; overflow-y: auto; }
 
         .card {
@@ -99,7 +97,6 @@
 
         h2 { margin-top: 0; color: var(--accent); border-bottom: 1px solid #334155; padding-bottom: 10px; }
 
-        /* Formularios */
         .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
         
         input, select, textarea {
@@ -122,16 +119,6 @@
         }
 
         .hidden { display: none; }
-        
-        .calendar-placeholder {
-            height: 150px;
-            background: #0f172a;
-            border: 1px dashed #334155;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-        }
     </style>
 </head>
 <body>
@@ -140,16 +127,16 @@
     <div id="login-screen">
         <h1>Academia de Oposiciones</h1>
         <p>Panel del Instructor</p>
-        <button class="btn-discord" onclick="login()">Iniciar Sesión con Discord</button>
+        <button class="btn-discord" onclick="loginDiscord()">Iniciar Sesión con Discord</button>
     </div>
 
     <!-- APLICACIÓN PRINCIPAL -->
     <div id="main-container">
-        <aside>
+        <aside id="nav-panel">
             <div class="sidebar-header">
                 <img id="user-avatar" src="" alt="Avatar">
                 <h3 id="user-name">Cargando...</h3>
-                <small id="user-role">Verificando...</small>
+                <small id="welcome-msg">Verificando...</small>
             </div>
             
             <nav class="nav-group">
@@ -167,11 +154,10 @@
             </div>
         </aside>
 
-        <main>
+        <main id="panel-instructor">
             <!-- SECCIÓN ADMIN -->
             <section id="sec-admin">
                 <h2>Panel de Control Global</h2>
-                
                 <div class="card">
                     <h3>📢 Enviar Aviso Global</h3>
                     <div class="grid-form">
@@ -179,14 +165,8 @@
                         <button class="primary" onclick="enviarAviso()">Enviar y Registrar</button>
                     </div>
                 </div>
-
                 <div class="card">
-                    <h3>📅 Calendario de Oposiciones</h3>
-                    <div class="calendar-placeholder">Módulo de Calendario Interactivo</div>
-                </div>
-
-                <div class="card">
-                    <h3>👤 Registro de Nuevo Opositor (Alta en el sistema)</h3>
+                    <h3>👤 Registro de Nuevo Opositor</h3>
                     <div class="grid-form">
                         <input type="text" id="reg-nombre" placeholder="Nombre completo">
                         <input type="text" id="reg-id" placeholder="Discord ID">
@@ -202,10 +182,9 @@
                 </div>
             </section>
 
-            <!-- SECCIÓN CUERPOS (DINÁMICA) -->
+            <!-- SECCIÓN CUERPOS -->
             <section id="sec-cuerpo" class="hidden">
                 <h2 id="cuerpo-titulo">Gestión de Cuerpo</h2>
-
                 <div class="card">
                     <h3>📝 Enviar Nuevo Examen</h3>
                     <div class="grid-form">
@@ -213,22 +192,6 @@
                         <input type="text" id="ex-nombre" placeholder="Nombre del examen">
                         <input type="text" id="ex-url" placeholder="URL del examen (Link)">
                         <button class="primary" onclick="mandarExamen()">Enviar Examen</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>🔍 Expediente del Opositor</h3>
-                    <div class="grid-form">
-                        <input type="text" id="search-user" placeholder="Buscar por ID Discord...">
-                        <button class="primary" onclick="buscarExpediente()">Ver Historial</button>
-                    </div>
-                    
-                    <div id="expediente-resultado" class="hidden" style="margin-top:20px;">
-                        <h4>Notas y Observaciones</h4>
-                        <textarea id="exp-observaciones" style="height:80px;" placeholder="Feedback del alumno..."></textarea>
-                        <h4>📓 Notas Privadas (Solo Instructor)</h4>
-                        <textarea id="exp-privado" style="height:80px; border-color:var(--danger);"></textarea>
-                        <button class="primary" style="margin-top:10px;">Guardar Cambios</button>
                     </div>
                 </div>
             </section>
@@ -244,58 +207,68 @@
             projectId: "examenes-profesoralumno"
         };
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
         const db = firebase.database();
 
-        // 1. LOGIN CON DISCORD (OAuth)
-        function login() {
-            const provider = new firebase.auth.OAuthProvider('discord.com');
-            auth.signInWithPopup(provider).catch(err => alert("Error: " + err.message));
-        }
+        // LOGICA DE DISCORD OAUTH2
+        const CLIENT_ID = '1500201403484737616'; 
+        const REDIRECT_URI = window.location.origin + window.location.pathname;
 
-        function logout() {
-            auth.signOut().then(() => location.reload());
-        }
+        window.loginDiscord = () => {
+            const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
+            window.location.href = url;
+        };
 
-        // 2. OBSERVADOR DE ESTADO
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                const discordID = user.providerData[0].uid;
-                verificarAcceso(discordID, user);
+        async function checkDiscordCallback() {
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+            const accessToken = params.get('access_token');
+            if (accessToken) {
+                try {
+                    const response = await fetch('https://discord.com/api/users/@me', {
+                        headers: { Authorization: `Bearer ${accessToken}` }
+                    });
+                    const userData = await response.json();
+                    if (userData.id) {
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        verificarYEntrar(userData);
+                    }
+                } catch (e) { console.error("Error Discord:", e); }
             }
-        });
+        }
 
-        // 3. VERIFICACIÓN EN BASE DE DATOS
-        function verificarAcceso(id, user) {
-            db.ref(`instructor/${id}`).once('value', snapshot => {
+        function verificarYEntrar(userData) {
+            // Verificamos si la ID de Discord existe en la rama 'instructor' de Firebase
+            db.ref(`instructor/${userData.id}`).once('value', snapshot => {
                 const data = snapshot.val();
-                if (!data) {
-                    alert("Acceso denegado. Tu ID de Discord (" + id + ") no está en la base de datos de instructores.");
-                    logout();
-                    return;
-                }
-
-                // Si tiene acceso, mostramos el panel
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-container').style.display = 'flex';
-                document.getElementById('user-name').innerText = user.displayName;
-                document.getElementById('user-avatar').src = user.photoURL;
-                
-                if (data.admin) {
-                    document.getElementById('user-role').innerText = "ADMINISTRADOR TOTAL";
+                if (data) {
+                    entrarAlSistema(userData, data);
                 } else {
-                    document.getElementById('user-role').innerText = "Instructor Autorizado";
-                    // Si no es admin, podrías ocultar el botón de Panel General aquí si quisieras
+                    alert("Acceso denegado. Tu ID (" + userData.id + ") no está autorizada.");
+                    logout();
                 }
             });
         }
 
-        // 4. NAVEGACIÓN ENTRE SECCIONES
+        function entrarAlSistema(userData, instructorData) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-container').style.display = 'flex';
+            
+            document.getElementById('user-name').innerText = userData.username;
+            document.getElementById('welcome-msg').innerText = `ID: ${userData.id}`;
+            
+            if(userData.avatar) {
+                document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
+            }
+        }
+
+        function logout() {
+            location.href = REDIRECT_URI;
+        }
+
+        // NAVEGACIÓN Y FUNCIONES
         function showSection(section) {
             const adminSec = document.getElementById('sec-admin');
             const cuerpoSec = document.getElementById('sec-cuerpo');
-            
-            // Estética de botones
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
 
@@ -309,62 +282,41 @@
             }
         }
 
-        // 5. FUNCIONES DE BASE DE DATOS
         function enviarAviso() {
             const txt = document.getElementById('aviso-texto').value;
             if(!txt) return;
             db.ref('avisos/actual').set({
                 mensaje: txt,
                 fecha: new Date().toLocaleString('es-ES')
-            }).then(() => {
-                alert("Aviso global enviado con éxito.");
-                document.getElementById('aviso-texto').value = "";
-            });
+            }).then(() => alert("Aviso global enviado."));
         }
 
         function registrarOpositor() {
             const id = document.getElementById('reg-id').value;
             const cuerpo = document.getElementById('reg-cuerpo').value;
             const nombre = document.getElementById('reg-nombre').value;
-
-            if(!id || !nombre) { alert("Rellena todos los campos"); return; }
-
+            if(!id || !nombre) return;
             db.ref(`alumnos/${id}`).set({
                 nombre: nombre,
                 cuerpo: cuerpo,
                 fecha_alta: new Date().toLocaleDateString('es-ES')
-            }).then(() => {
-                alert("Alumno " + nombre + " dado de alta correctamente.");
-                document.getElementById('reg-id').value = "";
-                document.getElementById('reg-nombre').value = "";
-            });
+            }).then(() => alert("Opositor registrado con éxito."));
         }
 
         function mandarExamen() {
             const opositor = document.getElementById('ex-user').value;
             const nombre = document.getElementById('ex-nombre').value;
             const url = document.getElementById('ex-url').value;
-
-            if(!opositor || !nombre || !url) { alert("Completa los datos del examen"); return; }
-
+            if(!opositor || !nombre || !url) return;
             db.ref(`examenes_enviados/${opositor}`).push({
                 nombre: nombre,
                 url: url,
                 fecha: new Date().toLocaleString('es-ES')
-            }).then(() => {
-                alert("Examen enviado al opositor con éxito.");
-                document.getElementById('ex-user').value = "";
-                document.getElementById('ex-nombre').value = "";
-                document.getElementById('ex-url').value = "";
-            });
+            }).then(() => alert("Examen enviado al opositor."));
         }
 
-        function buscarExpediente() {
-            const user = document.getElementById('search-user').value;
-            if(!user) return;
-            // Aquí se cargaría la info real de la BD
-            document.getElementById('expediente-resultado').classList.remove('hidden');
-        }
+        // Ejecutar comprobación al cargar la página
+        window.onload = checkDiscordCallback;
     </script>
 </body>
 </html>
