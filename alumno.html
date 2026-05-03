@@ -3,22 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.I.G.E. - Portal del Aspirante</title>
+    <title>S.I.G.E. - Portal de Seguridad</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #05070a;
-            --accent-cnp: #1e40af;
-            --accent-gc: #064e3b;
-            --accent-fire: #991b1b;
-            --accent-ems: #0891b2;
-            --accent-dgt: #854d0e;
-            --bg: #0f121a;
-            --card-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-dim: #94a3b8;
-            --border: #334155;
+            --primary: #020617;
+            --accent-emerald: #10b981;
+            --accent-gold: #fbbf24;
+            --bg-card: rgba(30, 41, 59, 0.5);
+            --text-main: #f1f5f9;
+            --text-dim: #64748b;
+            --border: #1e293b;
             --discord: #5865F2;
         }
 
@@ -27,41 +23,52 @@
             background-color: var(--primary); 
             color: var(--text-main); 
             margin: 0; 
+            background-image: radial-gradient(circle at 50% -20%, #1e293b 0%, #020617 80%);
+            min-height: 100vh;
         }
 
         /* --- PANTALLA DE ACCESO --- */
         #login-screen {
-            position: fixed; inset: 0; background: radial-gradient(circle at center, #1e293b 0%, #05070a 100%);
+            position: fixed; inset: 0; 
             display: flex; align-items: center; justify-content: center; z-index: 1000;
+            backdrop-filter: blur(4px);
         }
 
         .login-card {
-            background: rgba(15, 18, 26, 0.8); backdrop-filter: blur(10px);
-            padding: 40px; border-radius: 24px; border: 1px solid var(--border);
-            width: 100%; max-width: 350px; text-align: center;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 50px 40px; border-radius: 32px; 
+            border: 1px solid rgba(255,255,255,0.1);
+            width: 100%; max-width: 380px; text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
         /* --- NAVEGACIÓN --- */
         .navbar {
-            padding: 20px 40px; background: rgba(5, 7, 10, 0.9); border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
+            padding: 15px 40px; background: rgba(2, 6, 23, 0.8); 
+            backdrop-filter: blur(10px); border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center; 
+            position: sticky; top: 0; z-index: 100;
         }
 
         .container { max-width: 1200px; margin: 0 auto; padding: 40px; display: none; }
-        .grid-layout { display: grid; grid-template-columns: 1fr 380px; gap: 30px; }
+        .grid-layout { display: grid; grid-template-columns: 1fr 350px; gap: 30px; }
 
         .card {
-            background: var(--bg); border-radius: 16px; padding: 25px;
-            border: 1px solid var(--border); margin-bottom: 25px;
+            background: var(--bg-card); border-radius: 20px; padding: 25px;
+            border: 1px solid rgba(255,255,255,0.05); margin-bottom: 25px;
         }
 
         /* --- ESTILOS DE PRUEBAS --- */
         .exam-item {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 20px; background: rgba(0,0,0,0.3); border-radius: 12px;
-            border-left: 5px solid var(--border); margin-bottom: 15px;
+            padding: 20px; background: rgba(15, 23, 42, 0.4); border-radius: 16px;
+            border: 1px solid var(--border); margin-bottom: 15px;
+            transition: transform 0.2s;
         }
-        .dept-tag { font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; margin-bottom: 5px; display: inline-block; }
+        .exam-item:hover { transform: translateX(5px); border-color: var(--accent-emerald); }
+        
+        .dept-tag { font-size: 0.6rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; margin-bottom: 8px; display: inline-block; color: white; }
         
         .nota-box {
             font-family: 'JetBrains Mono', monospace; font-size: 1.8rem; font-weight: 800;
@@ -70,83 +77,85 @@
 
         /* --- CHAT --- */
         #chat-display { height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 10px; }
-        .msg { padding: 12px 18px; border-radius: 15px; font-size: 0.9rem; max-width: 80%; line-height: 1.4; }
-        .msg-alum { align-self: flex-end; background: #3b82f6; color: white; border-bottom-right-radius: 2px; }
-        .msg-prof { align-self: flex-start; background: var(--border); color: white; border-bottom-left-radius: 2px; }
+        .msg { padding: 12px 18px; border-radius: 18px; font-size: 0.85rem; max-width: 85%; line-height: 1.5; }
+        .msg-alum { align-self: flex-end; background: var(--accent-emerald); color: #020617; font-weight: 600; border-bottom-right-radius: 4px; }
+        .msg-prof { align-self: flex-start; background: #334155; color: white; border-bottom-left-radius: 4px; }
 
-        /* --- ELEMENTOS DE FORMULARIO --- */
+        /* --- BOTONES --- */
         .btn {
-            padding: 12px 24px; border-radius: 8px; border: none; font-weight: 800;
-            cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 0.75rem;
+            padding: 14px 24px; border-radius: 12px; border: none; font-weight: 800;
+            cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 0.7rem;
             display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+            letter-spacing: 1px;
         }
-        .btn-primary { background: white; color: black; }
-        .btn-discord { background: var(--discord); color: white; }
-        .btn-discord:hover { background: #4752c4; }
+        .btn-primary { background: var(--text-main); color: var(--primary); }
+        .btn-discord { background: var(--discord); color: white; font-size: 0.8rem; }
+        .btn-discord:hover { background: #4752c4; transform: translateY(-2px); box-shadow: 0 10px 20px -10px var(--discord); }
 
         .input-style {
-            width: 100%; background: #000; border: 1px solid var(--border);
-            padding: 14px; border-radius: 8px; color: white; margin-bottom: 15px; box-sizing: border-box;
+            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+            padding: 14px; border-radius: 10px; color: white; box-sizing: border-box; outline: none;
         }
+        .input-style:focus { border-color: var(--accent-emerald); }
 
         @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-    <!-- ACCESO -->
+    <!-- ACCESO (Solo Discord) -->
     <div id="login-screen">
         <div class="login-card">
-            <div style="font-weight: 800; font-size: 1.5rem; margin-bottom: 5px;">S.I.G.E. <span style="color:var(--text-dim)">ALUMNO</span></div>
-            <p style="color: var(--text-dim); font-size: 0.8rem; margin-bottom: 30px;">SISTEMA DE GESTIÓN DE EXÁMENES</p>
+            <div style="color: var(--accent-emerald); font-weight: 800; font-size: 0.75rem; letter-spacing: 3px; margin-bottom: 10px;">SEGURIDAD CENTRAL</div>
+            <div style="font-weight: 800; font-size: 2rem; margin-bottom: 5px;">S.I.G.E.</div>
+            <p style="color: var(--text-dim); font-size: 0.85rem; margin-bottom: 40px;">Identifíquese mediante la pasarela oficial para acceder a su expediente.</p>
             
-            <input type="text" id="alumno_id_input" class="input-style" placeholder="ID de Aspirante">
-            <button class="btn btn-primary" style="width: 100%; margin-bottom: 15px;" onclick="acceder()">Entrar con ID</button>
-            
-            <div style="margin: 15px 0; color: var(--text-dim); font-size: 0.6rem; letter-spacing: 1px;">O AUTENTICAR CON</div>
-
             <button class="btn btn-discord" style="width: 100%;" onclick="loginDiscord()">
-                <i class="fab fa-discord"></i> Vincular Discord
+                <i class="fab fa-discord" style="font-size: 1.2rem;"></i> Entrar con Discord
             </button>
+            
+            <div style="margin-top: 30px; font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;">
+                <i class="fas fa-lock"></i> Conexión Encriptada
+            </div>
         </div>
     </div>
 
     <!-- PANEL -->
     <nav class="navbar" id="nav-panel" style="display: none;">
-        <div style="font-weight: 800;">S.I.G.E. <span id="dept-label" style="color:var(--text-dim)">| PORTAL</span></div>
+        <div style="font-weight: 800; letter-spacing: 1px;">S.I.G.E. <span id="dept-label" style="color:var(--accent-emerald)">// ASPIRANTE</span></div>
         <div style="display: flex; align-items: center; gap: 20px;">
-            <div id="welcome-msg" style="font-size: 0.9rem; font-weight: 600;"></div>
-            <button onclick="location.reload()" class="btn" style="background: #991b1b; color: white; padding: 8px 15px;">Cerrar Sistema</button>
+            <div id="welcome-msg" style="font-size: 0.8rem; font-weight: 800; color: var(--text-dim);"></div>
+            <button onclick="location.reload()" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 15px;">Desconectar</button>
         </div>
     </nav>
 
     <div class="container" id="panel-alumno">
         <div class="grid-layout">
             <div class="main-col">
-                <div class="card" style="border-left: 5px solid #10b981;">
-                    <h3 style="margin-top: 0; font-size: 0.8rem; letter-spacing: 1px; color: var(--text-dim);">ORDEN DEL DÍA / OBSERVACIONES</h3>
-                    <div id="roadmap-content" style="line-height: 1.6; font-weight: 500; white-space: pre-wrap;">Consultando base de datos central...</div>
+                <div class="card" style="border-top: 4px solid var(--accent-emerald);">
+                    <h3 style="margin-top: 0; font-size: 0.7rem; letter-spacing: 2px; color: var(--accent-emerald); text-transform: uppercase;">Observaciones del Tribunal</h3>
+                    <div id="roadmap-content" style="line-height: 1.7; font-weight: 500; font-size: 0.95rem; white-space: pre-wrap; color: #cbd5e1;">Cargando...</div>
                 </div>
 
                 <div class="card">
-                    <h3 style="font-size: 0.8rem; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 25px;">HISTORIAL DE PRUEBAS Y CALIFICACIONES</h3>
+                    <h3 style="font-size: 0.7rem; letter-spacing: 2px; color: var(--text-dim); margin-bottom: 25px; text-transform: uppercase;">Registro de Calificaciones</h3>
                     <div id="tasks-container"></div>
                 </div>
             </div>
 
             <div class="side-col">
-                <div class="card" style="background: linear-gradient(135deg, #0f172a 0%, #000 100%); text-align: center;">
-                    <p style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim);">Hora Local (España)</p>
-                    <div id="timer-display" style="font-size: 2.5rem; font-weight: 800; margin: 15px 0; font-family: 'JetBrains Mono';">--:--:--</div>
-                    <div style="font-size: 0.7rem; color: #475569;"><i class="fas fa-map-marker-alt"></i> Sede Central: Valladolid</div>
+                <div class="card" style="background: linear-gradient(180deg, rgba(16, 185, 129, 0.1) 0%, rgba(2, 6, 23, 0) 100%); text-align: center; border-color: rgba(16, 185, 129, 0.2);">
+                    <p style="font-size: 0.6rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-emerald);">Hora en España</p>
+                    <div id="timer-display" style="font-size: 2.8rem; font-weight: 800; margin: 10px 0; font-family: 'JetBrains Mono'; color: var(--text-main);">--:--:--</div>
+                    <div style="font-size: 0.7rem; color: var(--text-dim);"><i class="fas fa-map-marker-alt"></i> Sede Valladolid</div>
                 </div>
 
                 <div class="card">
-                    <h3 style="font-size: 0.8rem; letter-spacing: 1px; color: var(--text-dim);"><i class="fas fa-comment-alt"></i> COMUNICACIÓN CON TRIBUNAL</h3>
+                    <h3 style="font-size: 0.7rem; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase;"><i class="fas fa-comment-dots"></i> Mensajes Directos</h3>
                     <div id="chat-display"></div>
                     <div style="display: flex; gap: 8px; margin-top: 15px;">
-                        <input type="text" id="msg_input" class="input-style" style="margin: 0;" placeholder="Enviar mensaje..." onkeyup="if(event.key === 'Enter') enviarMensaje()">
-                        <button class="btn btn-primary" style="padding: 0 20px;" onclick="enviarMensaje()"><i class="fas fa-paper-plane"></i></button>
+                        <input type="text" id="msg_input" class="input-style" placeholder="Escriba aquí..." onkeyup="if(event.key === 'Enter') enviarMensaje()">
+                        <button class="btn btn-primary" style="padding: 0 15px; border-radius: 10px;" onclick="enviarMensaje()"><i class="fas fa-paper-plane"></i></button>
                     </div>
                 </div>
             </div>
@@ -155,9 +164,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, push, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // --- CONFIGURACIÓN FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
             authDomain: "examenes-profesoralumno.firebaseapp.com",
@@ -172,17 +180,14 @@
         const db = getDatabase(app);
         let currentAlumId = null;
 
-        // --- CONFIGURACIÓN DISCORD ---
-        const CLIENT_ID = '1500201403484737616'; // <--- PON TU CLIENT ID AQUÍ
+        const CLIENT_ID = '1500201403484737616'; 
         const REDIRECT_URI = window.location.origin + window.location.pathname;
 
-        // Función para iniciar login con Discord
         window.loginDiscord = () => {
             const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
             window.location.href = url;
         };
 
-        // Comprobar si hay un token de Discord en la URL al cargar
         async function checkDiscordCallback() {
             const hash = window.location.hash.substring(1);
             const params = new URLSearchParams(hash);
@@ -196,36 +201,27 @@
                     const userData = await response.json();
                     
                     if (userData.username) {
-                        // Limpiar la URL de tokens por seguridad
                         window.history.replaceState({}, document.title, window.location.pathname);
-                        // Usamos el username de Discord como ID para Firebase
                         entrarAlSistema(userData.username);
                     }
                 } catch (e) {
-                    console.error("Error identificando con Discord", e);
+                    console.error("Error Discord:", e);
                 }
             }
         }
-
-        window.acceder = () => {
-            const id = document.getElementById('alumno_id_input').value.trim();
-            if(id) entrarAlSistema(id);
-        };
 
         function entrarAlSistema(id) {
             currentAlumId = id;
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('nav-panel').style.display = 'flex';
             document.getElementById('panel-alumno').style.display = 'block';
-            document.getElementById('welcome-msg').innerText = `ASPIRANTE: ${id.toUpperCase()}`;
-            
+            document.getElementById('welcome-msg').innerText = `ID: ${id.toUpperCase()}`;
             inicializarDatos(id);
         }
 
         function inicializarDatos(id) {
             onValue(ref(db, 'planificacion/' + id), (snap) => {
-                if(snap.exists()) document.getElementById('roadmap-content').innerText = snap.val().objetivos;
-                else document.getElementById('roadmap-content').innerText = "No hay observaciones registradas en su expediente.";
+                document.getElementById('roadmap-content').innerText = snap.exists() ? snap.val().objetivos : "No hay observaciones en su expediente.";
             });
 
             onValue(ref(db, 'examenes/' + id), (snap) => {
@@ -233,29 +229,24 @@
                 container.innerHTML = "";
                 if(snap.exists()) {
                     Object.values(snap.val()).reverse().forEach(t => {
-                        const dept = t.dept || 'CNP';
-                        const accent = `var(--accent-${dept.toLowerCase()})`;
                         const nota = t.nota || '--';
-                        const notaColor = nota !== '--' ? (parseFloat(nota) >= 5 ? '#10b981' : '#ef4444') : 'white';
-
+                        const notaColor = nota !== '--' ? (parseFloat(nota) >= 5 ? '#10b981' : '#ef4444') : 'var(--text-dim)';
                         container.innerHTML += `
-                            <div class="exam-item" style="border-left-color: ${accent}">
+                            <div class="exam-item">
                                 <div>
-                                    <span class="dept-tag" style="background:${accent}">${dept}</span>
-                                    <div style="font-weight: 800; font-size: 1.1rem;">${t.titulo}</div>
-                                    <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 5px;">
-                                        ${t.comentario ? ` <i class="fas fa-quote-left"></i> ${t.comentario}` : 'Pendiente de calificación'}
-                                    </div>
+                                    <span class="dept-tag" style="background: #1e293b; border: 1px solid var(--border)">${t.dept || 'GRL'}</span>
+                                    <div style="font-weight: 800; font-size: 1rem;">${t.titulo}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 5px;">${t.comentario || 'Pendiente de revisión'}</div>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 20px;">
-                                    ${!t.nota ? `<a href="${t.url}" target="_blank" class="btn" style="background:white; color:black;">REALIZAR</a>` : ''}
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    ${!t.nota ? `<a href="${t.url}" target="_blank" class="btn btn-primary" style="padding: 8px 15px;">Realizar</a>` : ''}
                                     <div class="nota-box" style="color: ${notaColor}">${nota}</div>
                                 </div>
                             </div>
                         `;
                     });
                 } else {
-                    container.innerHTML = "<p style='color:var(--text-dim); text-align:center;'>No se han encontrado registros en su expediente.</p>";
+                    container.innerHTML = "<p style='color:var(--text-dim); text-align:center;'>Expediente vacío.</p>";
                 }
             });
 
@@ -284,15 +275,12 @@
         };
 
         function updateTimer() {
-            const now = new Date();
-            document.getElementById('timer-display').innerText = now.toLocaleTimeString('es-ES', { hour12: false });
+            document.getElementById('timer-display').innerText = new Date().toLocaleTimeString('es-ES', { hour12: false });
         }
         
-        // Inicialización
         setInterval(updateTimer, 1000); 
         updateTimer();
-        checkDiscordCallback(); // Revisar si el usuario viene de Discord al cargar
-
+        checkDiscordCallback();
     </script>
 </body>
 </html>
