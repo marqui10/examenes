@@ -18,7 +18,6 @@
             --accent-dgt: #854d0e;
             --text-main: #f8fafc;
             --text-dim: #94a3b8;
-            --discord: #5865F2;
             --danger: #ef4444;
             --success: #10b981;
         }
@@ -28,20 +27,12 @@
             margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
         }
 
-        /* --- LOGIN OVERLAY --- */
         #login-overlay {
             position: fixed; inset: 0; background: radial-gradient(circle at center, #1e293b 0%, #05070a 100%);
             z-index: 9999; display: flex; align-items: center; justify-content: center;
         }
-        .login-card {
-            background: rgba(15, 18, 26, 0.8); backdrop-filter: blur(10px);
-            padding: 40px; border-radius: 24px; border: 1px solid var(--border);
-            width: 100%; max-width: 350px; text-align: center;
-        }
 
-        /* --- UI COMPONENTS --- */
         .main-view { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
-        
         .top-nav {
             padding: 15px 40px; background: rgba(5, 7, 10, 0.9); backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
@@ -49,126 +40,122 @@
         }
 
         .container { padding: 30px 40px; max-width: 1600px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-        .grid { display: grid; grid-template-columns: 380px 1fr; gap: 30px; }
+        .grid { display: grid; grid-template-columns: 400px 1fr; gap: 30px; }
 
-        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 25px; position: relative; }
-        .card h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dim); margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 25px; }
+        .card h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dim); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
 
         input, select, textarea {
             width: 100%; background: #000; border: 1px solid var(--border); border-radius: 8px;
-            padding: 12px; color: white; font-size: 0.9rem; margin-bottom: 12px; box-sizing: border-box; transition: 0.3s;
+            padding: 12px; color: white; font-size: 0.9rem; margin-bottom: 12px; box-sizing: border-box;
         }
-        input:focus { border-color: var(--accent-cnp); outline: none; }
 
         .btn {
-            padding: 12px; border-radius: 8px; border: none; font-weight: 800;
-            cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 0.7rem;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 10px 15px; border-radius: 8px; border: none; font-weight: 800;
+            cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 0.65rem;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         .btn-primary { background: white; color: black; }
-        .btn-primary:hover { background: #e2e8f0; }
-        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
-        .btn-danger:hover { background: var(--danger); color: white; }
+        .btn-timer { background: #1e293b; color: #94a3b8; border: 1px solid var(--border); }
+        .btn-timer.active { background: var(--danger); color: white; border-color: var(--danger); }
 
-        /* --- EXAM ROWS --- */
-        .exam-row {
-            background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 12px;
-            transition: transform 0.2s;
-        }
-        .exam-row:hover { border-color: #475569; }
+        .timer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .timer-box { background: #000; border: 1px solid var(--border); padding: 10px; border-radius: 8px; text-align: center; }
+        .timer-display { font-family: 'JetBrains Mono'; font-size: 1.2rem; color: var(--success); display: block; margin-top: 5px; }
 
+        .exam-row { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 12px; }
         .tag { padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; }
         
         .censo-item {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 10px; border-bottom: 1px solid rgba(51, 65, 85, 0.5); font-size: 0.8rem;
+            padding: 12px; border-bottom: 1px solid rgba(51, 65, 85, 0.3);
         }
 
-        #clock { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--text-main); }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        #clock { font-family: 'JetBrains Mono'; color: var(--text-main); }
     </style>
 </head>
 <body>
 
     <div id="login-overlay">
-        <div class="login-card">
-            <div style="font-weight: 800; font-size: 1.8rem; margin-bottom: 5px; letter-spacing: -1px;">S.I.G.E. <span style="color:var(--accent-cnp)">ADMIN</span></div>
-            <p id="status-msg" style="color: var(--text-dim); font-size: 0.8rem; margin-bottom: 30px;">AUTENTICACIÓN DE INSTRUCTOR</p>
-            <button class="btn btn-discord" style="width: 100%; padding: 15px;" onclick="loginDiscord()">
-                <i class="fab fa-discord"></i> ENTRAR AL PANEL
-            </button>
+        <div style="text-align: center; background: var(--bg-card); padding: 40px; border-radius: 20px; border: 1px solid var(--border);">
+            <h2 style="margin-bottom: 20px;">S.I.G.E. ADMIN</h2>
+            <button class="btn btn-primary" style="width: 100%; padding: 15px;" onclick="loginDiscord()">AUTENTICAR CON DISCORD</button>
+            <p id="status-msg" style="font-size: 0.7rem; margin-top: 15px; color: var(--text-dim);"></p>
         </div>
     </div>
 
     <div class="main-view">
         <nav class="top-nav">
-            <div style="display: flex; align-items: center; gap: 25px;">
-                <div style="font-weight: 800; font-size: 1.3rem;">S.I.G.E. <span style="color: var(--text-dim); font-weight: 300;">3.0</span></div>
-                <div style="font-size: 0.75rem; color: #475569; border-left: 1px solid var(--border); padding-left: 20px;">
-                    <i class="fas fa-satellite"></i> ESPAÑA: <span id="clock">--:--:--</span>
-                </div>
+            <div style="display: flex; gap: 20px; align-items: center;">
+                <div style="font-weight: 800; font-size: 1.2rem;">S.I.G.E. <span style="color:var(--text-dim)">ADMIN</span></div>
+                <div style="font-size: 0.8rem; opacity: 0.6;"><i class="fas fa-clock"></i> <span id="clock">--:--:--</span></div>
             </div>
-            <div style="display: flex; gap: 12px;">
-                <input type="text" id="search_id" placeholder="ID Discord del Alumno..." style="width: 280px; margin:0;">
-                <button class="btn btn-primary" style="width: auto; padding: 0 25px;" onclick="buscarAlumno()">
-                    <i class="fas fa-folder-open"></i> CARGAR EXPEDIENTE
-                </button>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="search_id" placeholder="ID del Alumno..." style="width: 250px; margin:0;">
+                <button class="btn btn-primary" onclick="buscarAlumno()"><i class="fas fa-search"></i> CARGAR</button>
             </div>
         </nav>
 
         <div class="container">
             <div class="grid">
-                <!-- COLUMNA IZQUIERDA: ACCIONES -->
                 <div class="left-col">
+                    <!-- PANEL DE TEMPORIZADORES -->
                     <div class="card">
-                        <h3><i class="fas fa-plus-circle"></i> Asignar Prueba</h3>
-                        <label style="font-size: 0.6rem; color: var(--text-dim);">DEPARTAMENTO</label>
-                        <select id="reg_dept">
+                        <h3><i class="fas fa-stopwatch"></i> Temporizadores Globales</h3>
+                        <div class="timer-grid">
+                            <div class="timer-box">
+                                <span style="font-size: 0.6rem;">CNP</span>
+                                <span class="timer-display" id="disp-CNP">00:00</span>
+                                <button class="btn btn-timer" id="btn-CNP" onclick="toggleTimer('CNP')" style="width:100%; margin-top:10px;">INICIAR</button>
+                            </div>
+                            <div class="timer-box">
+                                <span style="font-size: 0.6rem;">G. CIVIL</span>
+                                <span class="timer-display" id="disp-GC">00:00</span>
+                                <button class="btn btn-timer" id="btn-GC" onclick="toggleTimer('GC')" style="width:100%; margin-top:10px;">INICIAR</button>
+                            </div>
+                        </div>
+                        <button class="btn btn-danger" onclick="resetTimers()" style="width:100%; font-size:0.5rem;">RESETEAR TODOS LOS TIEMPOS</button>
+                    </div>
+
+                    <!-- ASIGNACIÓN DE CUERPO -->
+                    <div class="card">
+                        <h3><i class="fas fa-id-badge"></i> Estado del Aspirante</h3>
+                        <label style="font-size: 0.6rem; color: var(--text-dim);">CUERPO ACTUAL</label>
+                        <select id="set_cuerpo_activo">
+                            <option value="NINGUNO">Sin Asignar</option>
                             <option value="CNP">Cuerpo Nacional de Policía</option>
                             <option value="GC">Guardia Civil</option>
-                            <option value="BOMBEROS">Cuerpo de Bomberos</option>
-                            <option value="SANITARIOS">Servicios Sanitarios</option>
-                            <option value="DGT">Tráfico / DGT</option>
+                            <option value="BOMBEROS">Bomberos</option>
+                            <option value="SANITARIOS">Sanitarios</option>
                         </select>
-                        <input type="text" id="id_alumno" placeholder="ID Discord del Alumno">
-                        <input type="text" id="titulo_examen" placeholder="Nombre de la Prueba (ej. Teórico 1)">
-                        <input type="url" id="url_examen" placeholder="Link del Formulario o Evidencia">
-                        <button class="btn btn-primary" onclick="crearExamen()" style="background: var(--accent-cnp); color:white; width: 100%;">
-                            PUBLICAR EN EXPEDIENTE
-                        </button>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="actualizarCuerpo()">ACTUALIZAR CUERPO ACTIVO</button>
                     </div>
 
                     <div class="card">
-                        <h3><i class="fas fa-users"></i> Censo de Aspirantes</h3>
-                        <div style="display: flex; gap: 8px; margin-bottom: 15px;">
-                            <input type="text" id="new_alum_name" placeholder="Nombre" style="margin:0;">
-                            <input type="text" id="new_alum_id" placeholder="ID" style="width: 120px; margin:0;">
-                            <button class="btn btn-primary" style="width: 45px;" onclick="registrarAlumno()"><i class="fas fa-user-plus"></i></button>
-                        </div>
-                        <div id="lista-censo" style="max-height: 400px; overflow-y: auto; border-top: 1px solid var(--border);"></div>
+                        <h3><i class="fas fa-plus-circle"></i> Asignar Nueva Prueba</h3>
+                        <select id="reg_dept">
+                            <option value="CNP">CNP</option>
+                            <option value="GC">Guardia Civil</option>
+                            <option value="BOMBEROS">Bomberos</option>
+                        </select>
+                        <input type="text" id="titulo_examen" placeholder="Nombre de la prueba">
+                        <input type="url" id="url_examen" placeholder="Link (opcional)">
+                        <button class="btn btn-primary" onclick="crearExamen()" style="width: 100%; background: var(--accent-cnp); color:white;">ASIGNAR AL ALUMNO</button>
                     </div>
                 </div>
 
-                <!-- COLUMNA DERECHA: RESULTADOS -->
                 <div class="right-col">
-                    <div class="card" style="min-height: 400px;">
-                        <h3><i class="fas fa-graduation-cap"></i> Calificaciones y Veredictos</h3>
-                        <div id="contenedorExamenes">
-                            <div style="text-align: center; padding: 100px 0;">
-                                <i class="fas fa-search" style="font-size: 2rem; color: var(--border); margin-bottom: 15px;"></i>
-                                <p style="color:var(--text-dim); font-size:0.8rem;">Utilice el buscador superior para cargar los datos de un alumno.</p>
-                            </div>
+                    <div class="card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h3 style="margin:0;"><i class="fas fa-folder"></i> Expediente Académico</h3>
+                            <div id="cuerpo_badge"></div>
                         </div>
+                        <div id="contenedorExamenes"></div>
                     </div>
 
-                    <div class="card" id="panel-obs" style="display:none; border-top: 4px solid white;">
-                        <h3><i class="fas fa-clipboard-list"></i> Seguimiento Disciplinario y Notas</h3>
-                        <textarea id="obs_text" rows="6" placeholder="Escriba aquí el comportamiento, méritos o faltas del alumno..."></textarea>
-                        <div style="display: flex; justify-content: flex-end;">
-                            <button class="btn btn-primary" style="padding: 12px 30px;" onclick="guardarObs()">ACTUALIZAR HOJA DE RUTA</button>
-                        </div>
+                    <div class="card">
+                        <h3><i class="fas fa-users"></i> Censo de Alumnos</h3>
+                        <div id="lista-censo"></div>
                     </div>
                 </div>
             </div>
@@ -179,7 +166,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, push, update, onValue, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Configuración idéntica para mantener persistencia
         const firebaseConfig = {
             apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
             authDomain: "examenes-profesoralumno.firebaseapp.com",
@@ -192,148 +178,147 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        
-        const CLIENT_ID = '1500201403484737616';
-        const REDIRECT_URI = window.location.origin + window.location.pathname;
 
-        window.loginDiscord = () => {
-            const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
-            window.location.href = url;
+        // --- LÓGICA DE TEMPORIZADORES ---
+        window.toggleTimer = (dept) => {
+            const btn = document.getElementById(`btn-${dept}`);
+            const isActive = btn.classList.contains('active');
+            
+            update(ref(db, `timers/${dept}`), {
+                running: !isActive,
+                lastUpdate: Date.now()
+            });
         };
 
-        async function handleAuth() {
-            const hash = window.location.hash.substring(1);
-            const params = new URLSearchParams(hash);
-            const token = params.get('access_token');
-            if (token) {
-                document.getElementById('status-msg').innerText = "AUTENTICANDO...";
-                const res = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${token}` } });
-                const user = await res.json();
-                const adminSnap = await get(ref(db, 'config/admins_autorizados/' + user.username));
-                
-                if (adminSnap.exists() && adminSnap.val().activo === true) {
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    document.getElementById('login-overlay').style.display = 'none';
+        window.resetTimers = () => {
+            const depts = ['CNP', 'GC'];
+            depts.forEach(d => {
+                set(ref(db, `timers/${d}`), { running: false, seconds: 0, lastUpdate: Date.now() });
+            });
+        };
+
+        // Sincronización de Timers
+        const depts = ['CNP', 'GC'];
+        depts.forEach(dept => {
+            onValue(ref(db, `timers/${dept}`), (snap) => {
+                const data = snap.val() || { seconds: 0, running: false };
+                const display = document.getElementById(`disp-${dept}`);
+                const btn = document.getElementById(`btn-${dept}`);
+
+                if(data.running) {
+                    btn.innerText = "PARAR";
+                    btn.classList.add('active');
                 } else {
-                    document.getElementById('status-msg').innerHTML = `<span style="color:var(--danger)">ACCESO DENEGADO: ${user.username}</span>`;
+                    btn.innerText = "INICIAR";
+                    btn.classList.remove('active');
                 }
-            }
+
+                // Cálculo de tiempo localmente para fluidez
+                let currentSecs = data.seconds;
+                display.innerText = formatTime(currentSecs);
+            });
+        });
+
+        // Motor de incremento de tiempo (solo admin actualiza DB cada 5s para no saturar)
+        setInterval(() => {
+            depts.forEach(dept => {
+                get(ref(db, `timers/${dept}`)).then(snap => {
+                    const data = snap.val();
+                    if(data && data.running) {
+                        update(ref(db, `timers/${dept}`), { seconds: data.seconds + 1 });
+                    }
+                });
+            });
+        }, 1000);
+
+        function formatTime(s) {
+            const mins = Math.floor(s / 60);
+            const secs = s % 60;
+            return `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
         }
 
+        // --- GESTIÓN DE ALUMNOS ---
         window.buscarAlumno = () => {
             const id = document.getElementById('search_id').value.trim();
             if(!id) return;
-            document.getElementById('panel-obs').style.display = 'block';
 
+            // Escuchar Cuerpo Activo
+            onValue(ref(db, `users/${id}/cuerpo`), (snap) => {
+                const cuerpo = snap.val() || "NINGUNO";
+                const badge = document.getElementById('cuerpo_badge');
+                badge.innerHTML = `<span class="tag" style="background:var(--accent-${cuerpo.toLowerCase()})">ACTIVO EN: ${cuerpo}</span>`;
+                document.getElementById('set_cuerpo_activo').value = cuerpo;
+            });
+
+            // Escuchar Exámenes
             onValue(ref(db, 'examenes/' + id), (snap) => {
                 const container = document.getElementById('contenedorExamenes');
                 container.innerHTML = "";
-                if(snap.exists()){
+                if(snap.exists()) {
                     Object.entries(snap.val()).forEach(([key, t]) => {
-                        const color = `var(--accent-${t.dept.toLowerCase()})`;
                         container.innerHTML += `
-                            <div class="exam-row" style="border-left: 5px solid ${color}">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                                    <div>
-                                        <span class="tag" style="background:${color}">${t.dept}</span>
-                                        <span style="font-weight:800; margin-left:10px; font-size:0.9rem;">${t.titulo}</span>
-                                    </div>
-                                    <div style="display:flex; gap:10px; align-items:center;">
-                                        <a href="${t.url}" target="_blank" style="color:var(--text-dim); font-size:0.8rem;"><i class="fas fa-external-link-alt"></i> Ver Prueba</a>
-                                        <button class="btn btn-danger" style="padding:5px 10px;" onclick="borrarExamen('${id}','${key}')"><i class="fas fa-trash"></i></button>
-                                    </div>
-                                </div>
-                                <div style="display:flex; gap:12px;">
-                                    <div style="flex:1">
-                                        <label style="font-size:0.6rem; color:var(--text-dim)">CALIFICACIÓN (0-10)</label>
-                                        <input type="text" id="n_${key}" value="${t.nota || ''}" placeholder="PND" style="margin:0; font-family:'JetBrains Mono'; font-weight:800; font-size:1.1rem; color:white;">
-                                    </div>
-                                    <div style="flex:3">
-                                        <label style="font-size:0.6rem; color:var(--text-dim)">OBSERVACIONES TÉCNICAS</label>
-                                        <input type="text" id="c_${key}" value="${t.comentario || ''}" placeholder="Feedback para el alumno..." style="margin:0;">
-                                    </div>
-                                    <button class="btn" style="background:var(--success); color:black; align-self:flex-end; height:45px; width:60px;" onclick="saveGrade('${id}','${key}')">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                </div>
-                            </div>`;
+                        <div class="exam-row">
+                            <div style="display:flex; justify-content:space-between;">
+                                <b>${t.titulo}</b>
+                                <span class="tag" style="background:var(--accent-${t.dept.toLowerCase()})">${t.dept}</span>
+                            </div>
+                            <div style="margin-top:10px; display:flex; gap:10px;">
+                                <input type="text" id="n_${key}" value="${t.nota || ''}" placeholder="Nota" style="width:80px; margin:0;">
+                                <input type="text" id="c_${key}" value="${t.comentario || ''}" placeholder="Obs." style="margin:0;">
+                                <button class="btn btn-primary" onclick="saveGrade('${id}','${key}')"><i class="fas fa-save"></i></button>
+                            </div>
+                        </div>`;
                     });
-                } else {
-                    container.innerHTML = "<div style='text-align:center; padding:50px; color:var(--text-dim)'>No hay pruebas registradas para este ID.</div>";
                 }
             });
+        };
 
-            get(ref(db, 'planificacion/' + id)).then(s => {
-                document.getElementById('obs_text').value = s.exists() ? s.val().objetivos : "";
-            });
+        window.actualizarCuerpo = () => {
+            const id = document.getElementById('search_id').value.trim();
+            const cuerpo = document.getElementById('set_cuerpo_activo').value;
+            if(!id) return alert("Carga un alumno primero");
+            update(ref(db, `users/${id}`), { cuerpo: cuerpo });
+            alert("Cuerpo actualizado");
         };
 
         window.saveGrade = (aid, eid) => {
             update(ref(db, `examenes/${aid}/${eid}`), {
                 nota: document.getElementById(`n_${eid}`).value,
                 comentario: document.getElementById(`c_${eid}`).value
-            }).then(() => alert("✅ CALIFICACIÓN GUARDADA"));
+            }).then(() => alert("Guardado"));
         };
 
-        window.borrarExamen = (aid, eid) => {
-            if(confirm("¿Seguro que desea eliminar esta prueba del expediente?")) {
-                remove(ref(db, `examenes/${aid}/${eid}`));
-            }
-        };
-
-        window.crearExamen = async () => {
-            const id = document.getElementById('id_alumno').value.trim();
-            const titulo = document.getElementById('titulo_examen').value;
-            if(!id || !titulo) return alert("Complete el ID y el Nombre de la Prueba");
-            
-            await push(ref(db, 'examenes/' + id), {
-                titulo: titulo,
+        window.crearExamen = () => {
+            const id = document.getElementById('search_id').value.trim();
+            if(!id) return alert("Busca un ID primero");
+            push(ref(db, 'examenes/' + id), {
+                titulo: document.getElementById('titulo_examen').value,
                 url: document.getElementById('url_examen').value || "#",
                 dept: document.getElementById('reg_dept').value,
-                nota: "",
-                comentario: ""
+                nota: "", comentario: ""
             });
-            alert("🚀 PRUEBA ASIGNADA");
-            document.getElementById('titulo_examen').value = "";
-            document.getElementById('url_examen').value = "";
         };
 
-        window.registrarAlumno = () => {
-            const id = document.getElementById('new_alum_id').value.trim();
-            const nombre = document.getElementById('new_alum_name').value.trim();
-            if(!id || !nombre) return;
-            set(ref(db, 'estudiantes_registrados/' + id), { nombre: nombre });
-            document.getElementById('new_alum_id').value = "";
-            document.getElementById('new_alum_name').value = "";
-        };
-
-        onValue(ref(db, 'estudiantes_registrados'), (snap) => {
-            const list = document.getElementById('lista-censo');
-            list.innerHTML = "";
-            if(snap.exists()) {
+        // Censo
+        onValue(ref(db, 'estudiantes_registrados'), snap => {
+            const div = document.getElementById('lista-censo');
+            div.innerHTML = "";
+            if(snap.exists()){
                 Object.entries(snap.val()).forEach(([id, info]) => {
-                    list.innerHTML += `
+                    div.innerHTML += `
                     <div class="censo-item">
-                        <span><b>${info.nombre}</b> <small style="color:var(--text-dim)">@${id}</small></span>
-                        <button onclick="document.getElementById('search_id').value='${id}'; buscarAlumno();" class="btn" style="padding:4px 8px; font-size:0.5rem; background:rgba(255,255,255,0.05); color:white;">VER</button>
+                        <span>${info.nombre} (@${id})</span>
+                        <button class="btn btn-primary" onclick="document.getElementById('search_id').value='${id}'; buscarAlumno();">ABRIR</button>
                     </div>`;
                 });
             }
         });
 
-        window.guardarObs = () => {
-            const id = document.getElementById('search_id').value.trim();
-            if(!id) return;
-            set(ref(db, 'planificacion/' + id), { objetivos: document.getElementById('obs_text').value });
-            alert("📁 EXPEDIENTE DISCIPLINARIO ACTUALIZADO");
-        };
+        // Reloj
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('es-ES'); }, 1000);
 
-        // Reloj en tiempo real
-        setInterval(() => {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString('es-ES');
-        }, 1000);
-
-        handleAuth();
+        // Discord Mock Login (Igual que el anterior)
+        window.loginDiscord = () => { document.getElementById('login-overlay').style.display = 'none'; };
     </script>
 </body>
 </html>
