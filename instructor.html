@@ -77,7 +77,7 @@
             border-radius: 6px;
             cursor: pointer;
             transition: 0.3s;
-            display: none; /* Cambiado a none para control de permisos */
+            display: none; 
             align-items: center;
             font-size: 0.9rem;
         }
@@ -122,7 +122,6 @@
         button.success { background: var(--success); color: white; }
         button.danger { background: var(--danger); color: white; }
 
-        /* Tablas y Listas */
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -143,11 +142,6 @@
         .bg-cnp { background: #1e3a8a; }
 
         .hidden { display: none !important; }
-
-        .search-box {
-            position: relative;
-            margin-bottom: 20px;
-        }
 
         .expediente-header {
             display: flex;
@@ -196,6 +190,36 @@
             <section id="sec-admin" class="hidden">
                 <h2>Panel de Control Global</h2>
                 
+                <!-- GESTIÓN DE INSTRUCTORES -->
+                <div class="card">
+                    <h3>🔑 Gestión de Instructores</h3>
+                    <div class="grid-form">
+                        <input type="text" id="ins-id" placeholder="ID de Discord del Instructor">
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: #0f172a; padding: 10px; border-radius: 6px; grid-column: span 2;">
+                            <label><input type="checkbox" id="p-admin" style="width: auto;"> Admin</label>
+                            <label><input type="checkbox" id="p-gc" style="width: auto;"> GC</label>
+                            <label><input type="checkbox" id="p-cnp" style="width: auto;"> CNP</label>
+                            <label><input type="checkbox" id="p-sanitario" style="width: auto;"> Sanitarios</label>
+                            <label><input type="checkbox" id="p-bombero" style="width: auto;"> Bomberos</label>
+                            <label><input type="checkbox" id="p-dgt" style="width: auto;"> DGT</label>
+                        </div>
+                        <button class="success" onclick="guardarInstructor()">Dar de Alta Instructor</button>
+                    </div>
+
+                    <div style="margin-top: 15px; max-height: 200px; overflow-y: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID Instructor</th>
+                                    <th>Permisos</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lista-instructores"></tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Registro Opositor -->
                 <div class="card">
                     <h3>👤 Alta de Nuevo Opositor</h3>
@@ -241,9 +265,7 @@
                                     <th>Acción</th>
                                 </tr>
                             </thead>
-                            <tbody id="lista-usuarios-admin">
-                                <!-- Dinámico -->
-                            </tbody>
+                            <tbody id="lista-usuarios-admin"></tbody>
                         </table>
                     </div>
                 </div>
@@ -252,15 +274,11 @@
             <!-- SECCIÓN CARGOS (DINÁMICA) -->
             <section id="sec-cuerpo" class="hidden">
                 <h2 id="cuerpo-titulo">Gestión de Cuerpo</h2>
-
-                <!-- Buscador de Expediente -->
                 <div class="card">
                     <h3>🔍 Buscador de Alumno (Expediente)</h3>
-                    <div class="search-box">
-                        <div class="grid-form">
-                            <input type="text" id="search-id" placeholder="Pegar ID de Discord del alumno...">
-                            <button class="primary" onclick="buscarExpediente()">Ver Expediente Completo</button>
-                        </div>
+                    <div class="grid-form">
+                        <input type="text" id="search-id" placeholder="Pegar ID de Discord del alumno...">
+                        <button class="primary" onclick="buscarExpediente()">Ver Expediente</button>
                     </div>
 
                     <div id="expediente-container" class="hidden">
@@ -271,28 +289,22 @@
                             </div>
                             <span class="badge bg-gc" id="exp-tag">GC</span>
                         </div>
-
                         <div class="grid-form">
                             <div>
-                                <h4>📝 Nota del último examen</h4>
-                                <input type="number" step="0.01" id="exp-nota-val" placeholder="0.00">
+                                <h4>📝 Nota último examen</h4>
+                                <input type="number" step="0.01" id="exp-nota-val">
                             </div>
                             <div>
-                                <h4>💬 Observación pública</h4>
-                                <input type="text" id="exp-obs-val" placeholder="Ej: Muy buen progreso...">
+                                <h4>💬 Observación</h4>
+                                <input type="text" id="exp-obs-val">
                             </div>
                         </div>
-
-                        <h4>📓 Notas Privadas (Solo Instructores)</h4>
-                        <textarea id="exp-privada-val" rows="3" placeholder="Comentarios internos sobre el rendimiento..."></textarea>
-                        
-                        <div style="margin-top: 15px;">
-                            <button class="success" onclick="guardarNotas()">Guardar Expediente</button>
-                        </div>
+                        <h4>📓 Notas Privadas</h4>
+                        <textarea id="exp-privada-val" rows="3"></textarea>
+                        <button class="success" onclick="guardarNotas()" style="margin-top:10px;">Guardar Cambios</button>
                     </div>
                 </div>
 
-                <!-- Enviar Examen -->
                 <div class="card">
                     <h3>📝 Asignar Nuevo Examen</h3>
                     <div class="grid-form">
@@ -307,7 +319,6 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
             authDomain: "examenes-profesoralumno.firebaseapp.com",
@@ -319,14 +330,11 @@
 
         let currentCuerpo = "admin";
         let alumnoSeleccionado = null;
-
-        // --- LÓGICA DISCORD ---
         const CLIENT_ID = '1500201403484737616'; 
         const REDIRECT_URI = window.location.origin + window.location.pathname;
 
         function loginDiscord() {
-            const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
-            window.location.href = url;
+            window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
         }
 
         async function checkAuth() {
@@ -338,88 +346,91 @@
                 
                 db.ref(`instructor/${user.id}`).once('value', snap => {
                     if(snap.exists()){
-                        const perms = snap.val();
                         document.getElementById('login-screen').style.display = 'none';
                         document.getElementById('main-container').style.display = 'flex';
                         document.getElementById('user-name').innerText = user.username;
                         document.getElementById('welcome-msg').innerText = `ID: ${user.id}`;
                         if(user.avatar) document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
-                        
-                        setupPermissions(perms);
+                        setupPermissions(snap.val());
                         cargarListaMaestra();
-                    } else {
-                        alert("No eres instructor autorizado.");
-                    }
+                    } else { alert("No autorizado."); }
                 });
             }
         }
 
         function setupPermissions(p) {
             const items = {
-                admin: { nav: document.getElementById('nav-admin'), sec: 'admin' },
-                gc: { nav: document.getElementById('nav-gc'), sec: 'gc' },
-                cnp: { nav: document.getElementById('nav-cnp'), sec: 'cnp' },
-                sanitario: { nav: document.getElementById('nav-sanitario'), sec: 'sanitario' },
-                bombero: { nav: document.getElementById('nav-bombero'), sec: 'bombero' },
-                dgt: { nav: document.getElementById('nav-dgt'), sec: 'dgt' }
+                admin: { nav: document.getElementById('nav-admin') },
+                gc: { nav: document.getElementById('nav-gc') },
+                cnp: { nav: document.getElementById('nav-cnp') },
+                sanitario: { nav: document.getElementById('nav-sanitario') },
+                bombero: { nav: document.getElementById('nav-bombero') },
+                dgt: { nav: document.getElementById('nav-dgt') }
             };
 
-            if (p.admin === true) {
-                Object.values(items).forEach(item => item.nav.classList.add('visible'));
+            if (p.admin) {
+                cargarListaInstructores();
+                Object.values(items).forEach(i => i.nav.classList.add('visible'));
                 document.getElementById('nav-divider').classList.remove('hidden');
                 showSection('admin', items.admin.nav);
             } else {
-                let firstMatch = null;
-                Object.keys(items).forEach(key => {
-                    if (p[key] === true) {
-                        items[key].nav.classList.add('visible');
-                        if (!firstMatch) firstMatch = key;
-                    }
-                });
-
-                if (firstMatch) {
-                    showSection(firstMatch, items[firstMatch].nav);
-                } else {
-                    alert("No tienes departamentos asignados.");
-                }
+                let first = null;
+                Object.keys(items).forEach(k => { if(p[k]) { items[k].nav.classList.add('visible'); if(!first) first = k; } });
+                if(first) showSection(first, items[first].nav);
             }
         }
-
-        // --- FUNCIONES CORE ---
 
         function showSection(section, el) {
             currentCuerpo = section;
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
-
-            if(section === 'admin') {
-                document.getElementById('sec-admin').classList.remove('hidden');
-                document.getElementById('sec-cuerpo').classList.add('hidden');
-            } else {
-                document.getElementById('sec-admin').classList.add('hidden');
-                document.getElementById('sec-cuerpo').classList.remove('hidden');
-                document.getElementById('cuerpo-titulo').innerText = "Gestión: " + section.toUpperCase();
-                document.getElementById('expediente-container').classList.add('hidden');
-            }
+            document.getElementById('sec-admin').classList.toggle('hidden', section !== 'admin');
+            document.getElementById('sec-cuerpo').classList.toggle('hidden', section === 'admin');
+            if(section !== 'admin') document.getElementById('cuerpo-titulo').innerText = "Gestión: " + section.toUpperCase();
         }
 
+        // --- FUNCIONES INSTRUCTORES ---
+        function guardarInstructor() {
+            const id = document.getElementById('ins-id').value.trim();
+            if (!id) return;
+            const perms = {
+                admin: document.getElementById('p-admin').checked,
+                gc: document.getElementById('p-gc').checked,
+                cnp: document.getElementById('p-cnp').checked,
+                sanitario: document.getElementById('p-sanitario').checked,
+                bombero: document.getElementById('p-bombero').checked,
+                dgt: document.getElementById('p-dgt').checked
+            };
+            db.ref(`instructor/${id}`).set(perms).then(() => {
+                alert("Instructor Guardado");
+                document.getElementById('ins-id').value = "";
+            });
+        }
+
+        function cargarListaInstructores() {
+            db.ref('instructor').on('value', snap => {
+                const tbody = document.getElementById('lista-instructores');
+                tbody.innerHTML = "";
+                snap.forEach(child => {
+                    const p = child.val();
+                    let labels = [];
+                    if(p.admin) labels.push("ADMIN"); if(p.gc) labels.push("GC"); if(p.cnp) labels.push("CNP");
+                    tbody.innerHTML += `<tr><td><code>${child.key}</code></td><td>${labels.join(", ")}</td>
+                    <td><button class="danger" onclick="eliminarInstructor('${child.key}')">X</button></td></tr>`;
+                });
+            });
+        }
+
+        function eliminarInstructor(id) { if(confirm("¿Eliminar?")) db.ref(`instructor/${id}`).remove(); }
+
+        // --- FUNCIONES ALUMNOS ---
         function registrarOpositor() {
             const id = document.getElementById('reg-id').value;
             const nombre = document.getElementById('reg-nombre').value;
             const cuerpo = document.getElementById('reg-cuerpo').value;
-            
-            if(!id || !nombre) return alert("Rellena nombre e ID");
-
-            db.ref(`alumnos/${id}`).set({
-                nombre, id, cuerpo,
-                fecha_alta: new Date().toLocaleDateString(),
-                notas_privadas: "",
-                observacion_publica: "",
-                ultima_nota: 0
-            }).then(() => {
-                alert("Alumno registrado");
-                cargarListaMaestra();
-            });
+            if(!id || !nombre) return;
+            db.ref(`alumnos/${id}`).set({ nombre, id, cuerpo, fecha_alta: new Date().toLocaleDateString(), ultima_nota: 0 });
+            alert("Registrado.");
         }
 
         function cargarListaMaestra() {
@@ -428,14 +439,8 @@
                 list.innerHTML = "";
                 snap.forEach(child => {
                     const u = child.val();
-                    list.innerHTML += `
-                        <tr>
-                            <td>${u.nombre}</td>
-                            <td><code>${u.id}</code></td>
-                            <td><span class="badge bg-cnp">${u.cuerpo}</span></td>
-                            <td><button class="primary" onclick="copiarID('${u.id}')">Copiar ID</button></td>
-                        </tr>
-                    `;
+                    list.innerHTML += `<tr><td>${u.nombre}</td><td><code>${u.id}</code></td><td>${u.cuerpo}</td>
+                    <td><button class="primary" onclick="copiarID('${u.id}')">Copiar ID</button></td></tr>`;
                 });
             });
         }
@@ -453,9 +458,7 @@
                     document.getElementById('exp-nota-val').value = u.ultima_nota || 0;
                     document.getElementById('exp-obs-val').value = u.observacion_publica || "";
                     document.getElementById('exp-privada-val').value = u.notas_privadas || "";
-                } else {
-                    alert("Alumno no encontrado.");
-                }
+                } else alert("No encontrado");
             });
         }
 
@@ -465,17 +468,7 @@
                 ultima_nota: document.getElementById('exp-nota-val').value,
                 observacion_publica: document.getElementById('exp-obs-val').value,
                 notas_privadas: document.getElementById('exp-privada-val').value
-            }).then(() => alert("Expediente actualizado."));
-        }
-
-        function añadirEvento() {
-            const titulo = document.getElementById('cal-titulo').value;
-            const fecha = document.getElementById('cal-fecha').value;
-            const cuerpo = document.getElementById('cal-cuerpo').value;
-            if(!titulo || !fecha) return;
-
-            db.ref('calendario').push({ titulo, fecha, cuerpo })
-                .then(() => alert("Evento añadido al calendario"));
+            }).then(() => alert("Guardado"));
         }
 
         function mandarExamen() {
@@ -483,19 +476,18 @@
             const ex = document.getElementById('ex-nombre').value;
             const url = document.getElementById('ex-url').value;
             if(!id || !ex || !url) return;
-
-            db.ref(`examenes_enviados/${id}`).push({
-                nombre: ex, url: url, fecha: new Date().toLocaleString()
-            }).then(() => alert("Examen enviado correctamente."));
+            db.ref(`examenes_enviados/${id}`).push({ nombre: ex, url: url, fecha: new Date().toLocaleString() }).then(() => alert("Enviado"));
         }
 
-        function copiarID(id) {
-            navigator.clipboard.writeText(id);
-            alert("ID Copiada: " + id);
+        function añadirEvento() {
+            const titulo = document.getElementById('cal-titulo').value;
+            const fecha = document.getElementById('cal-fecha').value;
+            const cuerpo = document.getElementById('cal-cuerpo').value;
+            if(titulo && fecha) db.ref('calendario').push({ titulo, fecha, cuerpo }).then(() => alert("Añadido"));
         }
 
+        function copiarID(id) { navigator.clipboard.writeText(id); alert("Copiado"); }
         function logout() { window.location.href = REDIRECT_URI; }
-
         window.onload = checkAuth;
     </script>
 </body>
