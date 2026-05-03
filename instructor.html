@@ -152,6 +152,20 @@
             border-radius: 8px;
             margin-bottom: 15px;
         }
+
+        /* --- NUEVAS FUNCIONES VISUALES --- */
+        .stats-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 15px 0; }
+        .stat-card { background: #0f172a; padding: 15px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
+        .stat-card small { color: #94a3b8; display: block; font-size: 0.7rem; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-card span { font-size: 1.5rem; font-weight: bold; color: var(--accent); }
+
+        .actions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 15px; }
+        .action-btn { 
+            background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 8px; 
+            cursor: pointer; font-size: 0.85rem; display: flex; flex-direction: column; align-items: center; gap: 5px;
+        }
+        .action-btn:hover { border-color: var(--accent); background: #1e293b; }
+        .action-btn i { font-size: 1.2rem; }
     </style>
 </head>
 <body>
@@ -269,29 +283,59 @@
                     <div id="expediente-container" class="hidden">
                         <div class="expediente-header">
                             <div>
-                                <strong id="exp-nombre">---</strong><br>
+                                <strong id="exp-nombre" style="font-size: 1.2rem;">---</strong><br>
                                 <small id="exp-id">ID: ---</small>
                             </div>
                             <span class="badge bg-gc" id="exp-tag">GC</span>
                         </div>
+
+                        <!-- ESTADÍSTICAS RÁPIDAS -->
+                        <div class="stats-row">
+                            <div class="stat-card">
+                                <small>Media Global</small>
+                                <span id="stat-media">0.00</span>
+                            </div>
+                            <div class="stat-card">
+                                <small>Rendimiento</small>
+                                <span id="stat-status">---</span>
+                            </div>
+                        </div>
+
                         <div class="grid-form">
                             <div>
                                 <h4>📝 Nota último examen</h4>
                                 <input type="number" step="0.01" id="exp-nota-val">
                             </div>
                             <div>
-                                <h4>💬 Observación</h4>
-                                <input type="text" id="exp-obs-val">
+                                <h4>🚦 Estado del Alumno</h4>
+                                <select id="exp-estado-val">
+                                    <option value="normal">🟢 Progresando</option>
+                                    <option value="revision">🟡 En Revisión</option>
+                                    <option value="baja">🔴 Alerta de Rendimiento</option>
+                                </select>
                             </div>
                         </div>
-                        <h4>📓 Notas Privadas</h4>
-                        <textarea id="exp-privada-val" rows="3"></textarea>
-                        <button class="success" onclick="guardarNotas()" style="margin-top:10px;">Guardar Cambios</button>
+                        
+                        <h4>💬 Observación Pública (Alumno puede verla)</h4>
+                        <input type="text" id="exp-obs-val" placeholder="Ej: Buen progreso en ortografía...">
+                        
+                        <h4>📓 Notas Privadas (Solo Instructores)</h4>
+                        <textarea id="exp-privada-val" rows="3" placeholder="Notas internas sobre el perfil..."></textarea>
+                        
+                        <button class="success" onclick="guardarNotas()" style="margin-top:10px; width: 100%;">Guardar Cambios en Expediente</button>
+
+                        <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
+                        
+                        <!-- ACCIONES RÁPIDAS POR CUERPO -->
+                        <h3>⚡ Acciones Rápidas</h3>
+                        <div id="container-acciones" class="actions-grid">
+                            <!-- Dinámico -->
+                        </div>
                     </div>
                 </div>
 
                 <div class="card">
-                    <h3>📝 Asignar Nuevo Examen</h3>
+                    <h3>📝 Asignar Nuevo Examen / Recurso</h3>
                     <div class="grid-form">
                         <input type="text" id="ex-user-id" placeholder="ID Discord del Opositor">
                         <input type="text" id="ex-nombre" placeholder="Nombre del Examen">
@@ -317,6 +361,21 @@
         let alumnoSeleccionado = null;
         const CLIENT_ID = '1500201403484737616'; 
         const REDIRECT_URI = window.location.origin + window.location.pathname;
+
+        // Configuración de funciones por cuerpo
+        const funcionesExtra = {
+            gc: [
+                { label: "Baremo GC", icon: "📊", act: () => alert("Abriendo tabla de baremación...") },
+                { label: "Test Ortografía", icon: "✍️", act: () => alert("Enviando bloque de ortografía...") }
+            ],
+            cnp: [
+                { label: "Test Psico", icon: "🧩", act: () => alert("Asignando psicotécnico...") },
+                { label: "Cita Entrevista", icon: "📅", act: () => alert("Agendando simulacro...") }
+            ],
+            sanitario: [
+                { label: "Caso Clínico", icon: "🚑", act: () => alert("Enviando supuesto de triaje...") }
+            ]
+        };
 
         function loginDiscord() {
             window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
@@ -371,7 +430,24 @@
             el.classList.add('active');
             document.getElementById('sec-admin').classList.toggle('hidden', section !== 'admin');
             document.getElementById('sec-cuerpo').classList.toggle('hidden', section === 'admin');
-            if(section !== 'admin') document.getElementById('cuerpo-titulo').innerText = "Gestión: " + section.toUpperCase();
+            if(section !== 'admin') {
+                document.getElementById('cuerpo-titulo').innerText = "Gestión: " + section.toUpperCase();
+                renderAccionesExtra(section);
+            }
+        }
+
+        function renderAccionesExtra(cuerpo) {
+            const container = document.getElementById('container-acciones');
+            container.innerHTML = "";
+            const acciones = funcionesExtra[cuerpo] || [{ label: "No hay acciones", icon: "📋", act: ()=>{} }];
+            
+            acciones.forEach(acc => {
+                const btn = document.createElement('div');
+                btn.className = "action-btn";
+                btn.innerHTML = `<i>${acc.icon}</i> <strong>${acc.label}</strong>`;
+                btn.onclick = acc.act;
+                container.appendChild(btn);
+            });
         }
 
         function guardarInstructor() {
@@ -412,7 +488,12 @@
             const nombre = document.getElementById('reg-nombre').value;
             const cuerpo = document.getElementById('reg-cuerpo').value;
             if(!id || !nombre) return;
-            db.ref(`alumnos/${id}`).set({ nombre, id, cuerpo, fecha_alta: new Date().toLocaleDateString(), ultima_nota: 0 });
+            db.ref(`alumnos/${id}`).set({ 
+                nombre, id, cuerpo, 
+                fecha_alta: new Date().toLocaleDateString(), 
+                ultima_nota: 0,
+                estado: "normal" 
+            });
             alert("Registrado.");
         }
 
@@ -441,6 +522,11 @@
                     document.getElementById('exp-nota-val').value = u.ultima_nota || 0;
                     document.getElementById('exp-obs-val').value = u.observacion_publica || "";
                     document.getElementById('exp-privada-val').value = u.notas_privadas || "";
+                    document.getElementById('exp-estado-val').value = u.estado || "normal";
+                    
+                    // Stats visuales
+                    document.getElementById('stat-media').innerText = u.ultima_nota || "0.00";
+                    document.getElementById('stat-status').innerText = (u.estado || "normal").toUpperCase();
                 } else alert("No encontrado");
             });
         }
@@ -450,8 +536,12 @@
             db.ref(`alumnos/${alumnoSeleccionado}`).update({
                 ultima_nota: document.getElementById('exp-nota-val').value,
                 observacion_publica: document.getElementById('exp-obs-val').value,
-                notas_privadas: document.getElementById('exp-privada-val').value
-            }).then(() => alert("Guardado"));
+                notas_privadas: document.getElementById('exp-privada-val').value,
+                estado: document.getElementById('exp-estado-val').value
+            }).then(() => {
+                alert("Expediente Sincronizado");
+                buscarExpediente(); // Recargar visuales
+            });
         }
 
         function mandarExamen() {
