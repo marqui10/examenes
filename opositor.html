@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal del Opositor - Mi Expediente</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --sidebar-bg: #1e293b;
+            --accent: #3b82f6;
+            --text-light: #f8fafc;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --discord: #5865F2;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Pantalla de Login */
+        #login-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .btn-discord {
+            background-color: var(--discord);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: 0.3s;
+        }
+        .btn-discord:hover { transform: scale(1.05); }
+
+        /* Layout Principal */
+        #main-container { display: none; width: 100%; height: 100%; }
+
+        aside {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #334155;
+        }
+
+        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid #334155; }
+        #user-avatar { width: 60px; border-radius: 50%; margin-bottom: 10px; border: 2px solid var(--accent); }
+        
+        main { flex-grow: 1; padding: 30px; overflow-y: auto; }
+
+        .card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #334155;
+        }
+
+        h2 { margin-top: 0; color: var(--accent); border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        h3 { font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 15px 0; }
+        .stat-card { background: #0f172a; padding: 15px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
+        .stat-card small { color: #94a3b8; display: block; font-size: 0.7rem; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-card span { font-size: 1.5rem; font-weight: bold; color: var(--accent); }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .data-table th { text-align: left; padding: 12px; border-bottom: 2px solid #334155; color: var(--accent); }
+        .data-table td { padding: 12px; border-bottom: 1px solid #334155; }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-normal { background: var(--success); }
+        .status-revision { background: var(--warning); color: #000; }
+        .status-baja { background: var(--danger); }
+
+        .resource-link {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <h1>Portal del Opositor</h1>
+        <p>Consulta tu progreso y exámenes</p>
+        <button class="btn-discord" onclick="loginDiscord()">Entrar con Discord</button>
+    </div>
+
+    <div id="main-container">
+        <aside>
+            <div class="sidebar-header">
+                <img id="user-avatar" src="" alt="Avatar">
+                <h3 id="user-name">Cargando...</h3>
+                <p id="user-cuerpo" style="color: var(--accent); font-weight: bold; margin-top: -10px;">---</p>
+            </div>
+            
+            <div style="padding: 20px; flex-grow: 1;">
+                <div style="background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155;">
+                    <small style="color: #94a3b8;">TU ESTADO:</small>
+                    <div id="badge-estado" style="margin-top: 10px; text-align: center;">---</div>
+                </div>
+            </div>
+
+            <div style="padding: 20px;">
+                <button onclick="logout()" class="danger" style="width:100%; border:none; padding:10px; border-radius:6px; cursor:pointer; color:white; font-weight:bold;">Cerrar Sesión</button>
+            </div>
+        </aside>
+
+        <main>
+            <h2>📊 Mi Rendimiento Académico</h2>
+            
+            <!-- Resumen de Stats -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <small>Última Nota</small>
+                    <span id="stat-nota">0.00</span>
+                </div>
+                <div class="stat-card">
+                    <small>Fecha de Alta</small>
+                    <span id="stat-alta" style="font-size: 1rem;">--/--/--</span>
+                </div>
+                <div class="stat-card">
+                    <small>ID Discord</small>
+                    <span id="stat-id" style="font-size: 0.9rem;">---</span>
+                </div>
+            </div>
+
+            <!-- Observaciones del Instructor -->
+            <div class="card">
+                <h3>💬 Observaciones del Instructor</h3>
+                <p id="obs-publica" style="font-style: italic; color: #cbd5e1; background: #0f172a; padding: 15px; border-radius: 8px; border-left: 4px solid var(--accent);">
+                    No hay observaciones recientes.
+                </p>
+            </div>
+
+            <!-- Exámenes y Recursos Asignados -->
+            <div class="card">
+                <h3>📝 Mis Exámenes y Recursos</h3>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre del Recurso</th>
+                                <th>Fecha Asignación</th>
+                                <th>Acceso</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-recursos">
+                            <tr><td colspan="3" style="text-align:center;">Cargando recursos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // MISMA CONFIGURACIÓN QUE EL PANEL ADMIN
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
+            authDomain: "examenes-profesoralumno.firebaseapp.com",
+            databaseURL: "https://examenes-profesoralumno-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "examenes-profesoralumno"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const CLIENT_ID = '1500201403484737616'; 
+        const REDIRECT_URI = window.location.origin + window.location.pathname;
+
+        function loginDiscord() {
+            window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
+        }
+
+        async function checkAuth() {
+            const params = new URLSearchParams(window.location.hash.substring(1));
+            const token = params.get('access_token');
+            if (token) {
+                try {
+                    const resp = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${token}` }});
+                    const user = await resp.json();
+                    
+                    // Verificar si el usuario existe en la base de datos de alumnos
+                    db.ref(`alumnos/${user.id}`).on('value', snap => {
+                        const data = snap.val();
+                        if(data){
+                            renderPanel(user, data);
+                        } else {
+                            alert("No estás registrado en la academia. Contacta con un instructor.");
+                            logout();
+                        }
+                    });
+                } catch (e) { console.error("Error login:", e); }
+            }
+        }
+
+        function renderPanel(discordUser, dbData) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-container').style.display = 'flex';
+
+            // Datos de perfil
+            document.getElementById('user-name').innerText = discordUser.username;
+            document.getElementById('user-cuerpo').innerText = dbData.cuerpo.toUpperCase();
+            if(discordUser.avatar) {
+                document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`;
+            }
+
+            // Estadísticas
+            document.getElementById('stat-nota').innerText = dbData.ultima_nota || "0.00";
+            document.getElementById('stat-alta').innerText = dbData.fecha_alta || "No reg.";
+            document.getElementById('stat-id').innerText = discordUser.id;
+            
+            // Estado visual
+            const b = document.getElementById('badge-estado');
+            const est = dbData.estado || 'normal';
+            b.innerHTML = `<span class="badge status-${est}">${est.toUpperCase()}</span>`;
+
+            // Observaciones
+            if(dbData.observacion_publica) {
+                document.getElementById('obs-publica').innerText = `"${dbData.observacion_publica}"`;
+            }
+
+            // Cargar Recursos/Exámenes
+            cargarRecursos(discordUser.id);
+        }
+
+        function cargarRecursos(userId) {
+            db.ref(`examenes_enviados/${userId}`).on('value', snap => {
+                const tbody = document.getElementById('lista-recursos');
+                tbody.innerHTML = "";
+                
+                if(!snap.exists()) {
+                    tbody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>No tienes exámenes asignados aún.</td></tr>";
+                    return;
+                }
+
+                snap.forEach(child => {
+                    const res = child.val();
+                    const row = `<tr>
+                        <td><strong>${res.nombre}</strong></td>
+                        <td>${res.fecha}</td>
+                        <td><a href="${res.url}" target="_blank" class="resource-link">Abrir Recurso</a></td>
+                    </tr>`;
+                    tbody.innerHTML = row + tbody.innerHTML; // Los más nuevos arriba
+                });
+            });
+        }
+
+        function logout() { window.location.href = REDIRECT_URI; }
+        window.onload = checkAuth;
+    </script>
+</body>
+</html>
