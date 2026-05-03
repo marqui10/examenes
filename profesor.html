@@ -3,136 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.I.G.E. ADMIN - Sistema de Gestión Estatal</title>
+    <title>S.I.G.E. v4.0 - Panel de Administración Central</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #05070a; --bg-card: #0f121a; --border: #334155;
-            --accent-cnp: #1e40af; --accent-gc: #064e3b; --text-main: #f8fafc;
-            --text-dim: #94a3b8; --danger: #ef4444; --success: #10b981;
+            --accent: #3b82f6; --danger: #ef4444; --success: #10b981;
+            --text-main: #f8fafc; --text-dim: #94a3b8;
         }
 
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; background: var(--primary); color: var(--text-main);
-            margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+            margin: 0; display: flex; height: 100vh; overflow: hidden;
         }
 
-        /* OVERLAY LOGIN CORREGIDO */
+        /* --- LOGIN --- */
         #login-overlay {
             position: fixed; inset: 0; background: radial-gradient(circle at center, #1e293b 0%, #05070a 100%);
             z-index: 9999; display: flex; align-items: center; justify-content: center;
         }
 
-        .main-view { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
-        .top-nav {
-            padding: 15px 40px; background: rgba(5, 7, 10, 0.9); backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
-            position: sticky; top: 0; z-index: 10;
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 260px; background: #0a0c12; border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; padding: 20px;
         }
-
-        .container { padding: 30px 40px; max-width: 1600px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-        .grid { display: grid; grid-template-columns: 400px 1fr 350px; gap: 20px; }
-
-        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 20px; }
-        .card h3 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dim); margin-bottom: 15px; }
-
-        input, select {
-            width: 100%; background: #000; border: 1px solid var(--border); border-radius: 8px;
-            padding: 10px; color: white; font-size: 0.85rem; margin-bottom: 10px;
+        .nav-item {
+            padding: 12px 15px; border-radius: 10px; cursor: pointer; color: var(--text-dim);
+            transition: 0.3s; margin-bottom: 5px; display: flex; align-items: center; gap: 12px; font-weight: 600;
         }
+        .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.1); color: white; }
+        .nav-item i { width: 20px; }
 
-        .btn {
-            padding: 10px; border-radius: 8px; border: none; font-weight: 800;
-            cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 0.65rem;
-        }
-        .btn-primary { background: white; color: black; }
-        .btn-danger { background: var(--danger); color: white; }
+        /* --- MAIN CONTENT --- */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; background: #05070a; }
+        .top-nav { padding: 15px 30px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .container { padding: 30px; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
         
-        .timer-display { font-family: 'JetBrains Mono'; font-size: 1.5rem; color: var(--success); display: block; text-align: center; margin: 10px 0; }
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 0.7rem; }
+        .btn-primary { background: white; color: black; }
+        .btn-discord { background: #5865F2; color: white; }
 
-        /* CHAT */
-        #chat-box { height: 300px; overflow-y: auto; background: #000; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.8rem; margin-bottom: 10px; }
-        .msg { margin-bottom: 8px; padding: 5px; border-radius: 4px; }
-        .msg-admin { border-left: 3px solid var(--success); background: rgba(16, 185, 129, 0.1); }
-        .msg-user { border-left: 3px solid var(--accent-cnp); background: rgba(30, 64, 175, 0.1); }
+        input, select, textarea {
+            width: 100%; background: #000; border: 1px solid var(--border); border-radius: 8px;
+            padding: 12px; color: white; margin-bottom: 10px; box-sizing: border-box;
+        }
 
-        #clock { font-family: 'JetBrains Mono'; font-weight: bold; }
+        .timer-display { font-family: 'JetBrains Mono'; font-size: 2.5rem; color: var(--success); text-align: center; margin: 15px 0; }
+        
+        #clock-spain { font-weight: bold; color: var(--accent); }
     </style>
 </head>
 <body>
 
     <div id="login-overlay">
-        <div style="text-align: center; background: var(--bg-card); padding: 40px; border-radius: 20px; border: 1px solid var(--border);">
-            <h2 style="margin-bottom: 20px;">S.I.G.E. ADMIN</h2>
-            <button class="btn btn-primary" style="width: 100%; padding: 15px;" onclick="document.getElementById('login-overlay').style.display='none'">ENTRAR AL SISTEMA</button>
+        <div class="card" style="width: 350px; text-align: center;">
+            <h2 style="margin-bottom: 5px;">S.I.G.E.</h2>
+            <p style="color: var(--text-dim); font-size: 0.8rem; margin-bottom: 25px;">CONTROL DE ACCESO ESTATAL</p>
+            <button class="btn btn-discord" style="width: 100%;" onclick="loginDiscord()">
+                <i class="fab fa-discord"></i> ENTRAR CON DISCORD
+            </button>
+            <p id="auth-status" style="margin-top: 15px; font-size: 0.7rem;"></p>
         </div>
     </div>
 
-    <div class="main-view">
+    <div class="sidebar">
+        <div style="font-weight: 800; font-size: 1.4rem; margin-bottom: 30px;">SIGE <span style="font-weight:300; font-size: 0.8rem;">ADMIN</span></div>
+        <div class="nav-item active" onclick="showView('general')"><i class="fas fa-home"></i> General</div>
+        <hr style="border:0; border-top: 1px solid var(--border); margin: 10px 0;">
+        <div class="nav-item" onclick="accessCuerpo('CNP')"><i class="fas fa-shield-alt"></i> C.N.P.</div>
+        <div class="nav-item" onclick="accessCuerpo('GC')"><i class="fas fa-horse"></i> G. Civil</div>
+        <div class="nav-item" onclick="accessCuerpo('BOMBEROS')"><i class="fas fa-fire"></i> Bomberos</div>
+        <div class="nav-item" onclick="accessCuerpo('DGT')"><i class="fas fa-car"></i> D.G.T.</div>
+        <div class="nav-item" onclick="accessCuerpo('SANITARIOS')"><i class="fas fa-heartbeat"></i> Sanitarios</div>
+    </div>
+
+    <div class="main-content">
         <nav class="top-nav">
-            <div style="font-weight: 800; font-size: 1.2rem;">S.I.G.E. <span style="color:var(--text-dim)">ADMIN</span></div>
-            <div style="display: flex; gap: 20px; align-items: center;">
-                <div id="clock">18:42:31</div>
-                <input type="text" id="search_id" placeholder="ID Alumno..." style="width: 150px; margin:0;">
-                <button class="btn btn-primary" onclick="cargarAlumno()">CARGAR</button>
-            </div>
+            <div><i class="fas fa-map-marker-alt"></i> ESPAÑA: <span id="clock-spain">--:--:--</span></div>
+            <div id="user-info" style="font-size: 0.8rem; font-weight: bold;"></div>
         </nav>
 
-        <div class="container">
-            <div class="grid">
-                <!-- COLUMNA IZQUIERDA: CONTROLES GLOBALES -->
-                <div class="col">
+        <div class="container" id="view-general">
+            <div class="card">
+                <h3><i class="fas fa-bullhorn"></i> Crear Aviso General</h3>
+                <textarea id="global-notice" placeholder="Escribe un aviso para todos los alumnos..."></textarea>
+                <button class="btn btn-primary" onclick="postNotice()">PUBLICAR AVISO</button>
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-user-tag"></i> Asignación de Rama</h3>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="assign-user-id" placeholder="ID Discord Alumno" style="margin:0;">
+                    <select id="assign-cuerpo" style="margin:0;">
+                        <option value="CNP">CNP</option>
+                        <option value="GC">G. Civil</option>
+                        <option value="BOMBEROS">Bomberos</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="assignUser()">ASIGNAR</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="container" id="view-cuerpo" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 id="cuerpo-title">NOMBRE CUERPO</h2>
+                <button class="btn btn-danger" onclick="showView('general')">SALIR</button>
+            </div>
+
+            <div class="grid" style="display: grid; grid-template-columns: 1fr 350px; gap: 20px;">
+                <div class="left">
                     <div class="card">
-                        <h3><i class="fas fa-stopwatch"></i> Temporizadores</h3>
-                        <div>
-                            <span style="font-size: 0.6rem;">CNP</span>
-                            <div class="timer-display" id="disp-CNP">00:00</div>
-                            <div style="display: flex; gap: 5px;">
-                                <button class="btn btn-primary" style="flex:1" onclick="controlTimer('CNP', true)">START</button>
-                                <button class="btn btn-danger" style="flex:1" onclick="controlTimer('CNP', false)">STOP</button>
+                        <h3><i class="fas fa-stopwatch"></i> Control de Tiempo Rama</h3>
+                        <div class="timer-display" id="timer-val">00:00:00</div>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="datetime-local" id="target-time" style="margin:0;">
+                            <button class="btn btn-primary" onclick="startGlobalTimer()">SINCRONIZAR HORA</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-users"></i> Expedientes de la Rama</h3>
+                        <div id="alumno-list">
                             </div>
-                        </div>
-                        <hr style="border: 0; border-top: 1px solid var(--border); margin: 15px 0;">
-                        <button class="btn btn-danger" style="width: 100%;" onclick="resetAllTimers()">RESET GENERAL</button>
-                    </div>
-
-                    <div class="card">
-                        <h3><i class="fas fa-bell"></i> Notificar Alumno</h3>
-                        <input type="text" id="notif_msg" placeholder="Mensaje urgente...">
-                        <button class="btn btn-primary" style="width: 100%; background: #facc15; color: black;" onclick="enviarNotificacion()">ENVIAR ALERTA PANTALLA</button>
                     </div>
                 </div>
 
-                <!-- COLUMNA CENTRAL: EXPEDIENTE -->
-                <div class="col">
+                <div class="right">
                     <div class="card">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <h3><i class="fas fa-file-invoice"></i> Expediente: <span id="current_user_display">Ninguno</span></h3>
-                            <select id="set_cuerpo" style="width: 150px; margin:0;" onchange="actualizarCuerpo()">
-                                <option value="NINGUNO">Sin Cuerpo</option>
-                                <option value="CNP">CNP</option>
-                                <option value="GC">G. CIVIL</option>
-                            </select>
-                        </div>
-                        <div id="lista-examenes" style="margin-top: 20px;"></div>
-                    </div>
-                </div>
-
-                <!-- COLUMNA DERECHA: COMUNICACIONES -->
-                <div class="col">
-                    <div class="card">
-                        <h3><i class="fas fa-comments"></i> Chat Directo</h3>
-                        <div id="chat-box"></div>
-                        <div style="display: flex; gap: 5px;">
-                            <input type="text" id="chat_input" placeholder="Escribir..." style="margin:0;">
-                            <button class="btn btn-primary" onclick="enviarChat()"><i class="fas fa-paper-plane"></i></button>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <h3><i class="fas fa-users"></i> Censo</h3>
-                        <div id="censo-list" style="max-height: 200px; overflow-y: auto;"></div>
+                        <h3><i class="fas fa-comments"></i> Chat de Rama</h3>
+                        <div id="cuerpo-chat" style="height: 300px; overflow-y: auto; background:#000; padding:10px; border-radius:8px; font-size:0.8rem; margin-bottom:10px;"></div>
+                        <input type="text" id="cuerpo-chat-input" placeholder="Mensaje a la rama...">
+                        <button class="btn btn-primary" style="width: 100%;" onclick="sendCuerpoChat()">ENVIAR</button>
                     </div>
                 </div>
             </div>
@@ -156,106 +161,120 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- TEMPORIZADORES CORREGIDOS ---
-        window.controlTimer = (dept, status) => {
-            update(ref(db, `timers/${dept}`), { running: status });
+        let currentCuerpo = "";
+        let currentUser = null;
+
+        // --- AUTENTICACIÓN DISCORD ---
+        const CLIENT_ID = '1500201403484737616'; 
+        const REDIRECT_URI = window.location.origin + window.location.pathname;
+
+        window.loginDiscord = () => {
+            const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
+            window.location.href = url;
         };
 
-        window.resetAllTimers = () => {
-            set(ref(db, `timers/CNP`), { seconds: 0, running: false });
-        };
-
-        onValue(ref(db, `timers/CNP`), (snap) => {
-            if(snap.exists()) {
-                const data = snap.val();
-                document.getElementById('disp-CNP').innerText = formatTime(data.seconds || 0);
-            }
-        });
-
-        // Motor del cronómetro (Solo aumenta si 'running' es true)
-        setInterval(() => {
-            const timerRef = ref(db, `timers/CNP`);
-            get(timerRef).then(snap => {
-                if(snap.exists() && snap.val().running) {
-                    update(timerRef, { seconds: snap.val().seconds + 1 });
+        async function checkAuth() {
+            const params = new URLSearchParams(window.location.hash.substring(1));
+            const token = params.get('access_token');
+            if (token) {
+                document.getElementById('auth-status').innerText = "VERIFICANDO PERMISOS...";
+                const res = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${token}` } });
+                const user = await res.json();
+                
+                // Verificar en Firebase si es Admin
+                const snap = await get(ref(db, `config/admins_autorizados/${user.username}`));
+                if (snap.exists() && snap.val().activo === true) {
+                    currentUser = user;
+                    document.getElementById('login-overlay').style.display = 'none';
+                    document.getElementById('user-info').innerText = `INSTRUCTOR: ${user.username.toUpperCase()}`;
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                } else {
+                    document.getElementById('auth-status').innerHTML = `<span style="color:var(--danger)">NO TIENES PERMISOS DE ADMIN</span>`;
                 }
-            });
-        }, 1000);
-
-        function formatTime(s) {
-            const m = Math.floor(s / 60);
-            const sec = s % 60;
-            return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+            }
         }
 
-        // --- GESTIÓN DE ALUMNO Y CHAT ---
-        let currentID = "";
-
-        window.cargarAlumno = () => {
-            currentID = document.getElementById('search_id').value.trim();
-            if(!currentID) return;
-            document.getElementById('current_user_display').innerText = currentID;
+        // --- SEGURIDAD POR CUERPO ---
+        window.accessCuerpo = async (cuerpo) => {
+            const pass = prompt(`Introduce la contraseña de acceso para ${cuerpo}:`);
+            const snap = await get(ref(db, `config/passwords/${cuerpo}`));
             
-            // Cargar cuerpo
-            onValue(ref(db, `users/${currentID}/cuerpo`), (snap) => {
-                document.getElementById('set_cuerpo').value = snap.val() || "NINGUNO";
-            });
+            if (snap.exists() && snap.val() === pass) {
+                currentCuerpo = cuerpo;
+                openCuerpoView(cuerpo);
+            } else {
+                alert("Contraseña incorrecta.");
+            }
+        };
 
-            // Cargar Chat
-            onValue(ref(db, `chats/${currentID}`), (snap) => {
-                const box = document.getElementById('chat-box');
-                box.innerHTML = "";
-                if(snap.exists()){
-                    Object.values(snap.val()).forEach(m => {
-                        box.innerHTML += `<div class="msg ${m.user==='ADMIN'?'msg-admin':'msg-user'}"><b>${m.user}:</b> ${m.text}</div>`;
-                    });
-                    box.scrollTop = box.scrollHeight;
+        function openCuerpoView(cuerpo) {
+            document.getElementById('view-general').style.display = 'none';
+            document.getElementById('view-cuerpo').style.display = 'block';
+            document.getElementById('cuerpo-title').innerText = `PANEL DE CONTROL - ${cuerpo}`;
+            
+            // Sincronizar Temporizador del Cuerpo
+            onValue(ref(db, `timers/${cuerpo}`), (snap) => {
+                if(snap.exists()) {
+                    document.getElementById('timer-val').innerText = snap.val().display || "00:00:00";
                 }
             });
+
+            // Cargar alumnos asignados a esta rama
+            onValue(ref(db, 'estudiantes_registrados'), (snap) => {
+                const list = document.getElementById('alumno-list');
+                list.innerHTML = "";
+                if(snap.exists()){
+                    Object.entries(snap.val()).forEach(([id, info]) => {
+                        if(info.cuerpo === cuerpo) {
+                            list.innerHTML += `
+                                <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:10px 20px;">
+                                    <span><b>${info.nombre}</b> (@${id})</span>
+                                    <button class="btn btn-primary" onclick="alert('Abriendo expediente de ${id}')">VER EXPEDIENTE</button>
+                                </div>`;
+                        }
+                    });
+                }
+            });
+        }
+
+        window.showView = (view) => {
+            document.getElementById('view-general').style.display = view === 'general' ? 'block' : 'none';
+            document.getElementById('view-cuerpo').style.display = view === 'cuerpo' ? 'block' : 'none';
         };
 
-        window.actualizarCuerpo = () => {
-            if(!currentID) return;
-            update(ref(db, `users/${currentID}`), { cuerpo: document.getElementById('set_cuerpo').value });
+        // --- FUNCIONES GENERALES ---
+        window.postNotice = () => {
+            const msg = document.getElementById('global-notice').value;
+            set(ref(db, 'avisos_globales'), {
+                text: msg,
+                author: currentUser.username,
+                time: Date.now()
+            }).then(() => alert("Aviso publicado a todos los alumnos."));
         };
 
-        window.enviarChat = () => {
-            const txt = document.getElementById('chat_input').value;
-            if(!currentID || !txt) return;
-            push(ref(db, `chats/${currentID}`), { user: "ADMIN", text: txt, time: Date.now() });
-            document.getElementById('chat_input').value = "";
+        window.assignUser = () => {
+            const id = document.getElementById('assign-user-id').value;
+            const cuerpo = document.getElementById('assign-cuerpo').value;
+            update(ref(db, `estudiantes_registrados/${id}`), { cuerpo: cuerpo });
+            alert(`Usuario ${id} movido a ${cuerpo}`);
         };
 
-        // --- NOTIFICACIONES INDIVIDUALES ---
-        window.enviarNotificacion = () => {
-            const msg = document.getElementById('notif_msg').value;
-            if(!currentID || !msg) return alert("Carga un alumno y escribe un mensaje");
-            set(ref(db, `notifications/${currentID}`), {
-                message: msg,
-                type: "URGENTE",
-                timestamp: Date.now()
-            }).then(() => {
-                alert("Notificación enviada a la pantalla del alumno");
-                document.getElementById('notif_msg').value = "";
+        window.startGlobalTimer = () => {
+            const target = document.getElementById('target-time').value;
+            if(!target) return;
+            set(ref(db, `timers/${currentCuerpo}`), {
+                target: new Date(target).getTime(),
+                active: true
             });
         };
 
-        // Censo
-        onValue(ref(db, 'estudiantes_registrados'), snap => {
-            const div = document.getElementById('censo-list');
-            div.innerHTML = "";
-            if(snap.exists()){
-                Object.entries(snap.val()).forEach(([id, info]) => {
-                    div.innerHTML += `<div style="font-size:0.7rem; padding:5px; border-bottom:1px solid #222;">${info.nombre} (${id})</div>`;
-                });
-            }
-        });
-
-        // Reloj Spain
+        // Reloj España
         setInterval(() => {
-            const options = { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', second: '2-digit' };
-            document.getElementById('clock').innerText = new Intl.DateTimeFormat('es-ES', options).format(new Date());
+            const now = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date());
+            document.getElementById('clock-spain').innerText = now;
         }, 1000);
+
+        checkAuth();
     </script>
 </body>
 </html>
