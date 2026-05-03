@@ -153,7 +153,6 @@
             margin-bottom: 15px;
         }
 
-        /* --- NUEVAS FUNCIONES VISUALES --- */
         .stats-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 15px 0; }
         .stat-card { background: #0f172a; padding: 15px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
         .stat-card small { color: #94a3b8; display: block; font-size: 0.7rem; text-transform: uppercase; margin-bottom: 5px; }
@@ -166,6 +165,21 @@
         }
         .action-btn:hover { border-color: var(--accent); background: #1e293b; }
         .action-btn i { font-size: 1.2rem; }
+
+        /* --- NUEVOS ESTILOS BUSCADOR Y LOGS --- */
+        .search-container { margin-bottom: 15px; position: relative; }
+        .log-container { 
+            background: #0f172a; 
+            padding: 10px; 
+            border-radius: 8px; 
+            font-family: monospace; 
+            font-size: 0.8rem; 
+            max-height: 200px; 
+            overflow-y: auto;
+            border: 1px solid #334155;
+        }
+        .log-entry { margin-bottom: 5px; border-bottom: 1px solid #1e293b; padding-bottom: 3px; }
+        .log-time { color: var(--accent); margin-right: 8px; }
     </style>
 </head>
 <body>
@@ -251,9 +265,12 @@
                     </div>
                 </div>
 
-                <!-- Lista de Usuarios -->
+                <!-- Lista de Usuarios con Buscador -->
                 <div class="card">
                     <h3>📋 Listado Maestro de Usuarios</h3>
+                    <div class="search-container">
+                        <input type="text" id="master-search" placeholder="🔍 Buscar por nombre, ID o cuerpo..." onkeyup="filtrarUsuarios()">
+                    </div>
                     <div style="max-height: 300px; overflow-y: auto;">
                         <table class="data-table">
                             <thead>
@@ -266,6 +283,14 @@
                             </thead>
                             <tbody id="lista-usuarios-admin"></tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- LOG DE ACTIVIDAD -->
+                <div class="card">
+                    <h3>📜 Log de Actividad Reciente</h3>
+                    <div id="activity-log" class="log-container">
+                        <div class="log-entry">Esperando actividad...</div>
                     </div>
                 </div>
             </section>
@@ -414,6 +439,7 @@
 
             if (p.admin) {
                 cargarListaInstructores();
+                cargarLogs();
                 Object.values(items).forEach(i => i.nav.classList.add('visible'));
                 document.getElementById('nav-divider').classList.remove('hidden');
                 showSection('admin', items.admin.nav);
@@ -450,6 +476,38 @@
             });
         }
 
+        function registrarLog(msg) {
+            const user = document.getElementById('user-name').innerText;
+            db.ref('logs_actividad').push({
+                usuario: user,
+                accion: msg,
+                fecha: new Date().toLocaleString()
+            });
+        }
+
+        function cargarLogs() {
+            db.ref('logs_actividad').limitToLast(20).on('value', snap => {
+                const container = document.getElementById('activity-log');
+                container.innerHTML = "";
+                snap.forEach(child => {
+                    const l = child.val();
+                    container.innerHTML = `<div class="log-entry">
+                        <span class="log-time">[${l.fecha}]</span> 
+                        <strong>${l.usuario}</strong>: ${l.accion}
+                    </div>` + container.innerHTML;
+                });
+            });
+        }
+
+        function filtrarUsuarios() {
+            const term = document.getElementById('master-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#lista-usuarios-admin tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(term) ? '' : 'none';
+            });
+        }
+
         function guardarInstructor() {
             const id = document.getElementById('ins-id').value.trim();
             if (!id) return;
@@ -462,6 +520,7 @@
                 dgt: document.getElementById('p-dgt').checked
             };
             db.ref(`instructor/${id}`).set(perms).then(() => {
+                registrarLog(`Editó permisos del instructor ${id}`);
                 alert("Instructor Guardado");
                 document.getElementById('ins-id').value = "";
             });
@@ -481,7 +540,12 @@
             });
         }
 
-        function eliminarInstructor(id) { if(confirm("¿Eliminar?")) db.ref(`instructor/${id}`).remove(); }
+        function eliminarInstructor(id) { 
+            if(confirm("¿Eliminar?")) {
+                db.ref(`instructor/${id}`).remove();
+                registrarLog(`Eliminó al instructor ${id}`);
+            }
+        }
 
         function registrarOpositor() {
             const id = document.getElementById('reg-id').value;
@@ -493,8 +557,10 @@
                 fecha_alta: new Date().toLocaleDateString(), 
                 ultima_nota: 0,
                 estado: "normal" 
+            }).then(() => {
+                registrarLog(`Registró nuevo opositor: ${nombre} (${cuerpo.toUpperCase()})`);
+                alert("Registrado.");
             });
-            alert("Registrado.");
         }
 
         function cargarListaMaestra() {
@@ -524,7 +590,6 @@
                     document.getElementById('exp-privada-val').value = u.notas_privadas || "";
                     document.getElementById('exp-estado-val').value = u.estado || "normal";
                     
-                    // Stats visuales
                     document.getElementById('stat-media').innerText = u.ultima_nota || "0.00";
                     document.getElementById('stat-status').innerText = (u.estado || "normal").toUpperCase();
                 } else alert("No encontrado");
@@ -539,8 +604,9 @@
                 notas_privadas: document.getElementById('exp-privada-val').value,
                 estado: document.getElementById('exp-estado-val').value
             }).then(() => {
+                registrarLog(`Actualizó el expediente de ${alumnoSeleccionado}`);
                 alert("Expediente Sincronizado");
-                buscarExpediente(); // Recargar visuales
+                buscarExpediente();
             });
         }
 
@@ -549,7 +615,10 @@
             const ex = document.getElementById('ex-nombre').value;
             const url = document.getElementById('ex-url').value;
             if(!id || !ex || !url) return;
-            db.ref(`examenes_enviados/${id}`).push({ nombre: ex, url: url, fecha: new Date().toLocaleString() }).then(() => alert("Enviado"));
+            db.ref(`examenes_enviados/${id}`).push({ nombre: ex, url: url, fecha: new Date().toLocaleString() }).then(() => {
+                registrarLog(`Envió recurso/examen "${ex}" a ID:${id}`);
+                alert("Enviado");
+            });
         }
 
         function copiarID(id) { navigator.clipboard.writeText(id); alert("Copiado"); }
