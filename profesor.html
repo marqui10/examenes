@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.I.G.E. v4.0 - Panel de Administración Central</title>
+    <title>S.I.G.E. v5.0 - Control Central</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #05070a; --bg-card: #0f121a; --border: #334155;
+            --primary: #05070a; --bg-card: #0f121a; --border: #1e293b;
             --accent: #3b82f6; --danger: #ef4444; --success: #10b981;
             --text-main: #f8fafc; --text-dim: #94a3b8;
         }
@@ -18,121 +18,186 @@
             margin: 0; display: flex; height: 100vh; overflow: hidden;
         }
 
+        /* --- LOGIN --- */
         #login-overlay {
             position: fixed; inset: 0; background: radial-gradient(circle at center, #1e293b 0%, #05070a 100%);
             z-index: 9999; display: flex; align-items: center; justify-content: center;
         }
 
-        .sidebar {
-            width: 260px; background: #0a0c12; border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; padding: 20px;
-        }
-        .nav-item {
-            padding: 12px 15px; border-radius: 10px; cursor: pointer; color: var(--text-dim);
-            transition: 0.3s; margin-bottom: 5px; display: flex; align-items: center; gap: 12px; font-weight: 600;
-        }
+        /* --- LAYOUT --- */
+        .sidebar { width: 280px; background: #0a0c12; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px; }
+        .nav-item { padding: 12px 15px; border-radius: 10px; cursor: pointer; color: var(--text-dim); transition: 0.3s; margin-bottom: 5px; display: flex; align-items: center; gap: 12px; font-weight: 600; }
         .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.1); color: white; }
 
         .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; background: #05070a; }
-        .top-nav { padding: 15px 30px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .container { padding: 30px; max-width: 1200px; margin: 0 auto; width: 100%; }
+        .top-nav { padding: 15px 30px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(10,12,18,0.5); backdrop-filter: blur(10px); }
+        .container { padding: 30px; max-width: 1300px; margin: 0 auto; width: 100%; box-sizing: border-box; }
 
+        /* --- CARDS & UI --- */
         .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
-        
-        .btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 0.7rem; }
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 0.7rem; transition: 0.2s; }
         .btn-primary { background: white; color: black; }
-        .btn-discord { background: #5865F2; color: white; }
-
-        input, select, textarea {
-            width: 100%; background: #000; border: 1px solid var(--border); border-radius: 8px;
-            padding: 12px; color: white; margin-bottom: 10px; box-sizing: border-box;
-        }
-
-        .timer-display { font-family: 'JetBrains Mono'; font-size: 2.5rem; color: var(--success); text-align: center; margin: 15px 0; }
+        .btn-discord { background: #5865F2; color: white; width: 100%; }
         
-        /* Modal Expediente */
-        #modal-expediente {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000;
-            display: none; align-items: center; justify-content: center;
-        }
+        input, select, textarea { width: 100%; background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: white; margin-bottom: 10px; box-sizing: border-box; font-family: inherit; }
 
-        .exp-row { background: #1a1d26; padding: 10px; border-radius: 8px; margin-bottom: 5px; border-left: 3px solid var(--accent); }
+        /* --- EXPEDIENTE MODAL GIGANTE --- */
+        #modal-expediente {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10000;
+            display: none; padding: 40px; box-sizing: border-box;
+        }
+        .modal-content { 
+            display: grid; grid-template-columns: 1fr 350px; gap: 20px; height: 100%; max-width: 1400px; margin: 0 auto;
+        }
+        .chat-container { display: flex; flex-direction: column; background: #000; border: 1px solid var(--border); border-radius: 15px; height: 100%; }
+        #chat-msgs { flex: 1; overflow-y: auto; padding: 20px; font-size: 0.9rem; }
+        .msg { margin-bottom: 15px; padding: 10px; border-radius: 8px; max-width: 85%; }
+        .msg-admin { background: var(--accent); margin-left: auto; color: white; }
+        .msg-user { background: #1e293b; }
+
+        .timer-display { font-family: 'JetBrains Mono'; font-size: 3rem; color: var(--success); text-align: center; margin: 20px 0; letter-spacing: 2px; }
+        
+        /* --- LISTA OPOSICIONES --- */
+        .opo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+        .opo-item { background: #161b22; padding: 15px; border-radius: 12px; border: 1px solid var(--border); cursor: pointer; transition: 0.3s; }
+        .opo-item:hover { border-color: var(--accent); transform: translateY(-3px); }
     </style>
 </head>
 <body>
 
+    <!-- LOGIN -->
     <div id="login-overlay">
-        <div class="card" style="width: 350px; text-align: center;">
-            <h2 style="margin-bottom: 5px;">S.I.G.E.</h2>
-            <button class="btn btn-discord" style="width: 100%;" onclick="loginDiscord()">ENTRAR CON DISCORD</button>
-            <p id="auth-status" style="margin-top: 15px; font-size: 0.7rem;"></p>
+        <div class="card" style="width: 400px; text-align: center; border: 1px solid #5865F2;">
+            <h1 style="margin:0; font-size: 2.5rem; font-weight: 800;">S.I.G.E.</h1>
+            <p style="color: var(--text-dim); margin-bottom: 30px;">Panel de Administración Central Gubernamental</p>
+            <button class="btn btn-discord" onclick="loginDiscord()">
+                <i class="fab fa-discord"></i> ENTRAR CON DISCORD
+            </button>
+            <p id="auth-status" style="margin-top: 20px; font-size: 0.7rem; color: var(--danger);"></p>
         </div>
     </div>
 
-    <!-- MODAL EXPEDIENTE -->
+    <!-- MODAL EXPEDIENTE GIGANTE -->
     <div id="modal-expediente">
-        <div class="card" style="width: 600px; max-height: 80vh; overflow-y: auto;">
-            <h2 id="exp-nombre">Expediente</h2>
-            <div id="exp-contenido"></div>
-            <button class="btn btn-danger" style="width: 100%; margin-top: 20px;" onclick="document.getElementById('modal-expediente').style.display='none'">CERRAR</button>
+        <div class="modal-content">
+            <div style="display: flex; flex-direction: column; gap: 20px; overflow-y: auto;">
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h2 id="exp-nombre" style="margin:0;">EXPEDIENTE</h2>
+                        <button class="btn btn-danger" onclick="document.getElementById('modal-expediente').style.display='none'">CERRAR</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-edit"></i> Calificar / Añadir Examen</h3>
+                    <div style="display:grid; grid-template-columns: 1fr 100px; gap:10px;">
+                        <input type="text" id="ex-titulo" placeholder="Nombre del Examen">
+                        <input type="number" id="ex-nota" placeholder="Nota" step="0.1" max="10">
+                    </div>
+                    <textarea id="ex-comentario" placeholder="Observaciones del profesor..."></textarea>
+                    <button class="btn btn-primary" id="btn-save-ex">GUARDAR EN EXPEDIENTE</button>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-list"></i> Historial de Pruebas</h3>
+                    <div id="exp-lista-examenes"></div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-eye"></i> Notas Internas / Observaciones</h3>
+                    <div id="exp-observaciones" style="font-size: 0.9rem; color: var(--text-dim);"></div>
+                    <hr style="border:0; border-top: 1px solid var(--border); margin: 15px 0;">
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="new-obs" placeholder="Añadir nota de comportamiento..." style="margin:0;">
+                        <button class="btn btn-primary" id="btn-add-obs">AÑADIR</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHAT EN TIEMPO REAL -->
+            <div class="chat-container">
+                <div style="padding:15px; border-bottom: 1px solid var(--border); font-weight:800;">CHAT CON ASPIRANTE</div>
+                <div id="chat-msgs"></div>
+                <div style="padding:15px; display:flex; gap:10px;">
+                    <input type="text" id="chat-input" placeholder="Escribe un mensaje..." style="margin:0;">
+                    <button class="btn btn-primary" id="btn-send-chat">ENVIAR</button>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- SIDEBAR -->
     <div class="sidebar">
-        <div style="font-weight: 800; font-size: 1.4rem; margin-bottom: 30px;">SIGE ADMIN</div>
-        <div class="nav-item active" onclick="showView('general')"><i class="fas fa-home"></i> General</div>
-        <hr style="border:0; border-top: 1px solid var(--border); margin: 10px 0;">
+        <div style="font-weight: 800; font-size: 1.6rem; margin-bottom: 30px; letter-spacing: -1px;">SIGE <span style="color:var(--accent)">ADMIN</span></div>
+        <div class="nav-item active" onclick="showView('general')"><i class="fas fa-database"></i> Base Central</div>
+        <div style="font-size: 0.6rem; color: var(--text-dim); margin: 20px 0 10px 10px; letter-spacing: 2px;">GESTIÓN POR RAMAS</div>
         <div class="nav-item" onclick="accessCuerpo('CNP')"><i class="fas fa-shield-alt"></i> C.N.P.</div>
-        <div class="nav-item" onclick="accessCuerpo('GC')"><i class="fas fa-horse"></i> G. Civil</div>
+        <div class="nav-item" onclick="accessCuerpo('GC')"><i class="fas fa-horse"></i> Guardia Civil</div>
         <div class="nav-item" onclick="accessCuerpo('BOMBEROS')"><i class="fas fa-fire"></i> Bomberos</div>
+        <div class="nav-item" onclick="accessCuerpo('SANITARIOS')"><i class="fas fa-heartbeat"></i> Sanitarios</div>
+        <div class="nav-item" onclick="accessCuerpo('DOT')"><i class="fas fa-user-secret"></i> D.O.T.</div>
     </div>
 
+    <!-- MAIN -->
     <div class="main-content">
         <nav class="top-nav">
-            <div>ESPAÑA: <span id="clock-spain">--:--:--</span></div>
-            <div id="user-info" style="font-size: 0.8rem; font-weight: bold;"></div>
+            <div style="font-weight: 800; color: var(--accent);">ESPAÑA: <span id="clock-spain">--:--:--</span></div>
+            <div id="admin-id" style="font-size: 0.7rem; opacity: 0.5;">SISTEMA PROTEGIDO</div>
         </nav>
 
+        <!-- VIEW GENERAL -->
         <div class="container" id="view-general">
-            <div class="card">
-                <h3>Asignación de Rama</h3>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="assign-user-id" placeholder="ID Discord Alumno" style="margin:0;">
-                    <select id="assign-cuerpo" style="margin:0;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="card">
+                    <h3><i class="fas fa-bullhorn"></i> Aviso General del Estado</h3>
+                    <textarea id="global-notice" style="height: 100px;" placeholder="Este mensaje aparecerá a TODOS los alumnos..."></textarea>
+                    <button class="btn btn-primary" onclick="postNotice()">PUBLICAR AVISO OFICIAL</button>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-user-plus"></i> Registro de Aspirante</h3>
+                    <input type="text" id="assign-user-id" placeholder="Nombre Discord del Alumno">
+                    <select id="assign-cuerpo">
                         <option value="CNP">CNP</option>
-                        <option value="GC">G. Civil</option>
+                        <option value="GC">Guardia Civil</option>
                         <option value="BOMBEROS">Bomberos</option>
+                        <option value="SANITARIOS">Sanitarios</option>
+                        <option value="DOT">D.O.T.</option>
                     </select>
-                    <button class="btn btn-primary" onclick="assignUser()">ASIGNAR</button>
+                    <button class="btn btn-primary" onclick="assignUser()">ASIGNAR A RAMA</button>
                 </div>
             </div>
+
             <div class="card">
-                <h3>Aviso General</h3>
-                <textarea id="global-notice"></textarea>
-                <button class="btn btn-primary" onclick="postNotice()">PUBLICAR</button>
+                <h3><i class="fas fa-users"></i> Acceso Rápido: Lista de Aspirantes</h3>
+                <div class="opo-grid" id="main-aspirantes-list">
+                    <!-- Se llena con Firebase -->
+                </div>
             </div>
         </div>
 
+        <!-- VIEW CUERPO -->
         <div class="container" id="view-cuerpo" style="display: none;">
-            <h2 id="cuerpo-title">CUERPO</h2>
-            <div class="card">
-                <h3>Temporizador Rama</h3>
-                <div class="timer-display" id="timer-val">00:00:00</div>
-                <div style="display: flex; gap: 10px;">
-                    <input type="datetime-local" id="target-time" style="margin:0;">
-                    <button class="btn btn-primary" onclick="startGlobalTimer()">INICIAR CUENTA ATRÁS</button>
+            <h1 id="cuerpo-title" style="margin:0; font-size: 2.5rem; letter-spacing:-2px;">CUERPO</h1>
+            <div style="display:grid; grid-template-columns: 350px 1fr; gap: 20px; margin-top:30px;">
+                <div>
+                    <div class="card">
+                        <h3><i class="fas fa-clock"></i> Temporizador Oposición</h3>
+                        <div class="timer-display" id="timer-val">00:00:00</div>
+                        <input type="datetime-local" id="target-time">
+                        <button class="btn btn-primary" style="width:100%;" onclick="startGlobalTimer()">ACTUALIZAR RELOJ</button>
+                    </div>
                 </div>
-            </div>
-            <div class="card">
-                <h3>Alumnos en Rama</h3>
-                <div id="alumno-list"></div>
+                <div class="card">
+                    <h3>Aspirantes en la Rama</h3>
+                    <div id="alumno-list-cuerpo" class="opo-grid"></div>
+                </div>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, update, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, set, update, onValue, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
@@ -148,113 +213,178 @@
         const db = getDatabase(app);
 
         let currentCuerpo = "";
-        let timerInterval = null;
+        let currentAlumnoID = "";
+        let adminName = "";
 
-        // --- ARREGLO: TEMPORIZADOR ---
-        window.startGlobalTimer = () => {
-            const target = document.getElementById('target-time').value;
-            if(!target) return alert("Selecciona fecha y hora");
-            const endTime = new Date(target).getTime();
-            set(ref(db, `timers/${currentCuerpo}`), { target: endTime, active: true });
-        };
+        // --- AUTENTICACIÓN ---
+        window.loginDiscord = async () => {
+            const user = prompt("Introduce tu usuario de Discord para verificar autorización:");
+            if(!user) return;
 
-        function runTimerLogic(endTime) {
-            if(timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                const now = new Date().getTime();
-                const diff = endTime - now;
-
-                if (diff <= 0) {
-                    document.getElementById('timer-val').innerText = "00:00:00";
-                    clearInterval(timerInterval);
-                    return;
-                }
-
-                const h = Math.floor(diff / (1000 * 60 * 60));
-                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((diff % (1000 * 60)) / 1000);
-                document.getElementById('timer-val').innerText = 
-                    `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-            }, 1000);
-        }
-
-        // --- ARREGLO: EXPEDIENTE ---
-        window.verExpediente = async (alumnoID, nombre) => {
-            document.getElementById('modal-expediente').style.display = 'flex';
-            document.getElementById('exp-nombre').innerText = `Expediente: ${nombre}`;
-            const cont = document.getElementById('exp-contenido');
-            cont.innerHTML = "Cargando...";
-
-            const snap = await get(ref(db, `examenes/${alumnoID}`));
-            cont.innerHTML = "";
-            if(snap.exists()){
-                Object.values(snap.val()).forEach(ex => {
-                    cont.innerHTML += `
-                        <div class="exp-row">
-                            <b>${ex.titulo}</b> - Nota: <span style="color:var(--success)">${ex.nota || 'S/N'}</span><br>
-                            <small>${ex.comentario || 'Sin observaciones'}</small>
-                        </div>`;
-                });
+            const snap = await get(ref(db, `config/admins_autorizados`));
+            const admins = snap.val() || [];
+            
+            // Comprobamos si el usuario está en el array de admins_autorizados
+            if (Object.values(admins).includes(user)) {
+                adminName = user;
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('admin-id').innerText = `ADMIN: ${user.toUpperCase()}`;
+                loadMainData();
             } else {
-                cont.innerHTML = "No hay exámenes registrados.";
+                document.getElementById('auth-status').innerText = "ERROR: Usuario no autorizado en la base de datos.";
             }
         };
 
-        // --- RESTO DE LÓGICA (MANTENIDA) ---
-        window.accessCuerpo = async (cuerpo) => {
-            const pass = prompt(`Pass para ${cuerpo}:`);
-            const snap = await get(ref(db, `config/passwords/${cuerpo}`));
-            if (snap.exists() && snap.val() === pass) {
-                currentCuerpo = cuerpo;
-                openCuerpoView(cuerpo);
-            } else alert("Error");
-        };
-
-        function openCuerpoView(cuerpo) {
-            showView('cuerpo');
-            document.getElementById('cuerpo-title').innerText = cuerpo;
-            
-            onValue(ref(db, `timers/${cuerpo}`), (snap) => {
-                if(snap.exists() && snap.val().active) runTimerLogic(snap.val().target);
-            });
-
+        function loadMainData() {
+            // Lista rápida de aspirantes
             onValue(ref(db, 'estudiantes_registrados'), (snap) => {
-                const list = document.getElementById('alumno-list');
+                const list = document.getElementById('main-aspirantes-list');
                 list.innerHTML = "";
                 if(snap.exists()){
                     Object.entries(snap.val()).forEach(([id, info]) => {
-                        if(info.cuerpo === cuerpo) {
-                            const row = document.createElement('div');
-                            row.className = 'card';
-                            row.style = 'display:flex; justify-content:space-between; align-items:center; padding:10px;';
-                            row.innerHTML = `<span>${info.nombre}</span>`;
-                            const btn = document.createElement('button');
-                            btn.className = 'btn btn-primary';
-                            btn.innerText = 'VER EXPEDIENTE';
-                            btn.onclick = () => verExpediente(id, info.nombre);
-                            row.appendChild(btn);
-                            list.appendChild(row);
-                        }
+                        const div = document.createElement('div');
+                        div.className = 'opo-item';
+                        div.innerHTML = `
+                            <div style="font-weight:800;">${info.nombre}</div>
+                            <div style="font-size:0.7rem; color:var(--accent)">${info.cuerpo || 'Sin asignar'}</div>
+                        `;
+                        div.onclick = () => verExpediente(id, info.nombre);
+                        list.appendChild(div);
                     });
                 }
             });
         }
 
-        window.loginDiscord = () => { document.getElementById('login-overlay').style.display='none'; };
+        // --- EXPEDIENTE INTERACTIVO ---
+        window.verExpediente = (id, nombre) => {
+            currentAlumnoID = id;
+            document.getElementById('modal-expediente').style.display = 'block';
+            document.getElementById('exp-nombre').innerText = `EXPEDIENTE: ${nombre.toUpperCase()}`;
+            
+            // Cargar Exámenes
+            onValue(ref(db, `examenes/${id}`), (snap) => {
+                const cont = document.getElementById('exp-lista-examenes');
+                cont.innerHTML = "";
+                if(snap.exists()){
+                    Object.values(snap.val()).forEach(ex => {
+                        cont.innerHTML += `
+                            <div style="background:#1a1d26; padding:10px; border-radius:8px; margin-bottom:10px; border-left:4px solid var(--success);">
+                                <b>${ex.titulo}</b> - NOTA: <span style="color:var(--success)">${ex.nota}</span><br>
+                                <small style="color:var(--text-dim)">${ex.comentario || ''}</small>
+                            </div>`;
+                    });
+                }
+            });
+
+            // Cargar Observaciones
+            onValue(ref(db, `observaciones_internas/${id}`), (snap) => {
+                const obsDiv = document.getElementById('exp-observaciones');
+                obsDiv.innerHTML = snap.exists() ? Object.values(snap.val()).join('<br>• ') : "Sin observaciones.";
+            });
+
+            // Cargar Chat
+            onValue(ref(db, `chats/${id}`), (snap) => {
+                const chatDiv = document.getElementById('chat-msgs');
+                chatDiv.innerHTML = "";
+                if(snap.exists()){
+                    Object.values(snap.val()).forEach(m => {
+                        const div = document.createElement('div');
+                        div.className = `msg ${m.user === 'ADMIN' ? 'msg-admin' : 'msg-user'}`;
+                        div.innerText = m.text;
+                        chatDiv.appendChild(div);
+                    });
+                    chatDiv.scrollTop = chatDiv.scrollHeight;
+                }
+            });
+        };
+
+        // Guardar Examen
+        document.getElementById('btn-save-ex').onclick = () => {
+            const titulo = document.getElementById('ex-titulo').value;
+            const nota = document.getElementById('ex-nota').value;
+            const obs = document.getElementById('ex-comentario').value;
+            if(!titulo || !nota) return alert("Rellena título y nota");
+            
+            push(ref(db, `examenes/${currentAlumnoID}`), {
+                titulo: titulo,
+                nota: nota,
+                comentario: obs,
+                fecha: new Date().toLocaleDateString()
+            });
+            alert("Calificación guardada");
+        };
+
+        // Chat
+        document.getElementById('btn-send-chat').onclick = () => {
+            const txt = document.getElementById('chat-input').value;
+            if(!txt) return;
+            push(ref(db, `chats/${currentAlumnoID}`), {
+                user: 'ADMIN',
+                text: txt,
+                timestamp: Date.now()
+            });
+            document.getElementById('chat-input').value = "";
+        };
+
+        // --- GESTIÓN GENERAL ---
+        window.postNotice = () => {
+            const txt = document.getElementById('global-notice').value;
+            set(ref(db, 'avisos_globales'), {
+                text: txt,
+                author: adminName,
+                fecha: new Date().toLocaleString()
+            });
+            alert("Aviso publicado a nivel nacional");
+        };
+
+        window.assignUser = () => {
+            const id = document.getElementById('assign-user-id').value;
+            const c = document.getElementById('assign-cuerpo').value;
+            update(ref(db, `estudiantes_registrados/${id}`), { nombre: id, cuerpo: c });
+            alert("Aspirante asignado");
+        };
+
+        // --- RELOJ Y TEMPORIZADORES ---
+        setInterval(() => {
+            document.getElementById('clock-spain').innerText = new Date().toLocaleTimeString('es-ES');
+        }, 1000);
+
+        let timerInterval;
+        window.startGlobalTimer = () => {
+            const target = document.getElementById('target-time').value;
+            const endTime = new Date(target).getTime();
+            set(ref(db, `timers/${currentCuerpo}`), { target: endTime, active: true });
+        };
+
+        window.accessCuerpo = async (cuerpo) => {
+            currentCuerpo = cuerpo;
+            showView('cuerpo');
+            document.getElementById('cuerpo-title').innerText = cuerpo;
+            
+            onValue(ref(db, `timers/${cuerpo}`), (snap) => {
+                if(timerInterval) clearInterval(timerInterval);
+                if(snap.exists()){
+                    timerInterval = setInterval(() => {
+                        const now = Date.now();
+                        const diff = snap.val().target - now;
+                        if(diff <= 0) {
+                            document.getElementById('timer-val').innerText = "EN CURSO";
+                            return;
+                        }
+                        const h = Math.floor(diff / 3600000);
+                        const m = Math.floor((diff % 3600000) / 60000);
+                        const s = Math.floor((diff % 60000) / 1000);
+                        document.getElementById('timer-val').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                    }, 1000);
+                }
+            });
+        };
+
         window.showView = (v) => {
             document.getElementById('view-general').style.display = v === 'general' ? 'block' : 'none';
             document.getElementById('view-cuerpo').style.display = v === 'cuerpo' ? 'block' : 'none';
         };
-        window.assignUser = () => {
-            const id = document.getElementById('assign-user-id').value;
-            const c = document.getElementById('assign-cuerpo').value;
-            update(ref(db, `estudiantes_registrados/${id}`), { cuerpo: c });
-            alert("Asignado");
-        };
 
-        setInterval(() => {
-            document.getElementById('clock-spain').innerText = new Date().toLocaleTimeString('es-ES');
-        }, 1000);
     </script>
 </body>
 </html>
