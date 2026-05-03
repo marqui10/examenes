@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.I.G.E. - Próximas Oposiciones</title>
+    <title>S.I.G.E. - Panel del Aspirante</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #020617;
-            --accent-cnp: #1e40af;
-            --accent-gc: #065f46;
-            --accent-fire: #991b1b;
+            --accent-cnp: #3b82f6;
             --text-main: #f1f5f9;
             --text-dim: #64748b;
             --border: #1e293b;
             --discord: #5865F2;
+            --bg-card: rgba(30, 41, 59, 0.4);
         }
 
         body { 
@@ -25,104 +24,116 @@
             margin: 0; 
             background-image: radial-gradient(circle at 50% -20%, #1e293b 0%, #020617 80%);
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         /* --- LOGIN --- */
-        #login-screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); }
-        .login-card { background: rgba(15, 23, 42, 0.9); padding: 50px; border-radius: 32px; border: 1px solid var(--border); text-align: center; max-width: 400px; }
+        #login-screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(12px); background: rgba(2, 6, 23, 0.7); }
+        .login-card { background: #0f172a; padding: 50px; border-radius: 32px; border: 1px solid var(--border); text-align: center; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
 
         /* --- NAVBAR --- */
-        .navbar { padding: 15px 40px; background: rgba(2, 6, 23, 0.8); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .navbar { padding: 15px 40px; background: rgba(2, 6, 23, 0.8); border-bottom: 1px solid var(--border); display: none; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 40px; display: none; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 40px; display: none; }
         .grid-layout { display: grid; grid-template-columns: 1fr 350px; gap: 30px; }
 
-        /* --- CUENTA ATRÁS GLOBAL --- */
+        /* --- CUENTA ATRÁS --- */
         .countdown-box {
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(2, 6, 23, 0.8) 100%);
-            border-radius: 24px; padding: 30px; border: 1px solid var(--border);
-            text-align: center; margin-bottom: 30px; position: relative; overflow: hidden;
+            border-radius: 24px; padding: 35px; border: 1px solid var(--border);
+            text-align: center; margin-bottom: 30px; border-top: 4px solid var(--accent-cnp);
         }
         #timer-display {
             font-family: 'JetBrains Mono', monospace; font-size: 3.5rem; font-weight: 800;
-            display: flex; justify-content: center; gap: 20px; margin: 15px 0;
+            display: flex; justify-content: center; gap: 20px; margin: 20px 0; color: white;
         }
-        .time-unit { display: flex; flex-direction: column; align-items: center; }
-        .time-label { font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 2px; }
+        .time-unit { display: flex; flex-direction: column; align-items: center; min-width: 80px; }
+        .time-label { font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 2px; margin-top: 5px; }
 
-        /* --- COMPONENTES --- */
-        .card { background: rgba(30, 41, 59, 0.4); border-radius: 20px; padding: 25px; border: 1px solid var(--border); }
-        .dept-badge { padding: 4px 12px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; }
+        /* --- CARDS --- */
+        .card { background: var(--bg-card); border-radius: 20px; padding: 25px; border: 1px solid var(--border); backdrop-filter: blur(5px); }
+        .dept-badge { padding: 6px 14px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         
-        .btn { padding: 12px 24px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 0.7rem; transition: 0.3s; }
-        .btn-discord { background: var(--discord); color: white; width: 100%; }
+        .btn { padding: 12px 24px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 0.7rem; transition: all 0.3s ease; }
+        .btn-discord { background: var(--discord); color: white; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-discord:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(88, 101, 242, 0.5); }
+        .btn-start { background: white; color: black; }
+        .btn-start:hover { background: #e2e8f0; }
 
-        #modal-examen { position: fixed; inset: 0; background: var(--primary); z-index: 2000; display: none; flex-direction: column; }
+        /* --- EXAMEN MODAL --- */
+        #modal-examen { position: fixed; inset: 0; background: #000; z-index: 2000; display: none; flex-direction: column; }
         iframe { width: 100%; height: 100%; border: none; }
 
-        @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } #timer-display { font-size: 2rem; } }
+        .notice-item { padding: 15px; border-bottom: 1px solid var(--border); font-size: 0.9rem; border-left: 3px solid var(--accent-cnp); background: rgba(255,255,255,0.02); margin-bottom: 10px; border-radius: 0 8px 8px 0; }
+
+        @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } #timer-display { font-size: 2.2rem; gap: 10px; } .time-unit { min-width: 50px; } }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <div class="login-card">
-            <h1 style="margin:0; font-size: 2.5rem; font-weight: 800;">S.I.G.E.</h1>
-            <p style="color: var(--text-dim); margin-bottom: 30px;">CENTRAL DE OPOSICIONES DE SEGURIDAD</p>
+            <h1 style="margin:0; font-size: 2.5rem; font-weight: 800; letter-spacing: -1px;">S.I.G.E.</h1>
+            <p style="color: var(--text-dim); margin-bottom: 30px; font-size: 0.85rem;">SISTEMA INTEGRAL DE GESTIÓN ESTATAL</p>
             <button class="btn btn-discord" onclick="loginDiscord()">
-                <i class="fab fa-discord"></i> Acceder al Expediente
+                <i class="fab fa-discord" style="font-size: 1.2rem;"></i> IDENTIFICARSE CON DISCORD
             </button>
         </div>
     </div>
 
-    <nav class="navbar" id="nav-panel" style="display: none;">
+    <nav class="navbar" id="nav-panel">
         <div style="display:flex; align-items:center; gap:15px;">
             <span style="font-weight: 800; letter-spacing: 1px;">S.I.G.E.</span>
-            <span id="badge-dept" class="dept-badge" style="background: var(--border);">Cargando...</span>
+            <span id="badge-dept" class="dept-badge" style="background: var(--border);">SIN ASIGNAR</span>
         </div>
-        <div id="user-info" style="font-size: 0.75rem; font-weight: 800; color: var(--text-dim);"></div>
+        <div id="user-info" style="font-size: 0.75rem; font-weight: 800; color: var(--text-dim); border-left: 1px solid var(--border); padding-left: 15px;"></div>
     </nav>
 
     <div class="container" id="panel-alumno">
-        <!-- CONTADOR GLOBAL DEL ADMIN -->
+        <!-- CRONÓMETRO DE RAMA SINCRONIZADO -->
         <div class="countdown-box" id="header-color">
-            <div id="opo-titulo" style="font-size: 0.8rem; font-weight: 800; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase;">Próxima Convocatoria</div>
+            <div id="opo-titulo" style="font-size: 0.75rem; font-weight: 800; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase;">TIEMPO RESTANTE PARA EXAMEN</div>
             <div id="timer-display">
                 <div class="time-unit"><span id="days">00</span><span class="time-label">Días</span></div>
                 <div class="time-unit"><span id="hours">00</span><span class="time-label">Horas</span></div>
                 <div class="time-unit"><span id="minutes">00</span><span class="time-label">Min</span></div>
                 <div class="time-unit"><span id="seconds">00</span><span class="time-label">Seg</span></div>
             </div>
-            <div id="opo-fecha-txt" style="font-size: 0.7rem; color: var(--text-dim); font-weight: 600;">Sincronizando con el Tribunal...</div>
+            <div id="opo-fecha-txt" style="font-size: 0.7rem; color: var(--text-dim); font-weight: 600;">SINCRONIZANDO RELOJ...</div>
         </div>
 
         <div class="grid-layout">
             <div class="main-col">
                 <div class="card">
-                    <h3 style="margin-top:0; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 1px;">EXÁMENES DISPONIBLES</h3>
-                    <div id="tasks-container"></div>
+                    <h3 style="margin-top:0; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase;">Mis Expedientes y Exámenes</h3>
+                    <div id="tasks-container">
+                        <p style="color:var(--text-dim); font-size: 0.8rem;">Buscando exámenes asignados...</p>
+                    </div>
                 </div>
             </div>
+            
             <div class="side-col">
                 <div class="card">
-                    <h3 style="margin-top:0; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 1px;">NOTIFICACIONES</h3>
-                    <div id="chat-display" style="height: 250px; overflow-y: auto; font-size: 0.85rem; line-height: 1.6;"></div>
+                    <h3 style="margin-top:0; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase;">Avisos de Comandancia</h3>
+                    <div id="chat-display">
+                        <div class="notice-item">No hay avisos recientes en tu rama.</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="modal-examen">
-        <div style="padding: 15px; background: #000; display:flex; justify-content:space-between; align-items:center;">
-            <span id="modal-tag" class="dept-badge">EXAMEN OFICIAL</span>
-            <button onclick="cerrarExamen()" class="btn" style="background:#ef4444; color:white; padding: 5px 15px;">Finalizar y Salir</button>
+        <div style="padding: 12px 25px; background: #0a0a0a; display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #333;">
+            <span id="modal-tag" class="dept-badge" style="background:#3b82f6">EXAMEN OFICIAL S.I.G.E.</span>
+            <button onclick="cerrarExamen()" class="btn" style="background:#ef4444; color:white; padding: 6px 15px; font-size: 0.6rem;">ENTREGAR Y CERRAR</button>
         </div>
         <iframe id="examen-frame"></iframe>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
@@ -136,15 +147,12 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        let currentId = null;
 
-        // CONFIGURACIÓN DE DEPARTAMENTOS
         const DEPTS = {
-            'CNP': { color: '#1e40af', name: 'Cuerpo Nacional de Policía' },
-            'GC': { color: '#065f46', name: 'Guardia Civil' },
-            'DGT': { color: '#ca8a04', name: 'Tráfico / DGT' },
-            'BOMBEROS': { color: '#b91c1c', name: 'Servicio de Extinción' },
-            'SANITARIOS': { color: '#0891b2', name: 'Emergencias Sanitarias' }
+            'CNP': { color: '#3b82f6', name: 'CNP' },
+            'GC': { color: '#10b981', name: 'Guardia Civil' },
+            'BOMBEROS': { color: '#ef4444', name: 'Bomberos' },
+            'SANITARIOS': { color: '#06b6d4', name: 'Sanitarios' }
         };
 
         window.loginDiscord = () => {
@@ -159,92 +167,110 @@
                 const res = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${token}` } });
                 const user = await res.json();
                 window.history.replaceState({}, document.title, window.location.pathname);
-                iniciarPanel(user.username);
+                cargarDatosAspirante(user.username);
             }
         }
 
-        function iniciarPanel(id) {
-            currentId = id;
+        function cargarDatosAspirante(username) {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('nav-panel').style.display = 'flex';
             document.getElementById('panel-alumno').style.display = 'block';
-            document.getElementById('user-info').innerText = `ASPIRANTE: ${id.toUpperCase()}`;
+            document.getElementById('user-info').innerText = `ID ASPIRANTE: ${username.toUpperCase()}`;
 
-            // 1. Obtener Perfil del Alumno
-            onValue(ref(db, `alumnos/${id}/perfil`), (snap) => {
-                const p = snap.val() || { departamento: 'CNP' };
-                const config = DEPTS[p.departamento] || DEPTS.CNP;
-                
-                document.getElementById('badge-dept').innerText = p.departamento;
-                document.getElementById('badge-dept').style.background = config.color;
-                document.getElementById('header-color').style.borderTop = `6px solid ${config.color}`;
-                document.getElementById('modal-tag').style.background = config.color;
-            });
+            // Sincronizar Rama del Alumno
+            onValue(ref(db, `estudiantes_registrados/${username}`), (snap) => {
+                const info = snap.val();
+                if(info && info.cuerpo) {
+                    const cuerpo = info.cuerpo;
+                    const config = DEPTS[cuerpo] || { color: '#64748b' };
+                    
+                    const badge = document.getElementById('badge-dept');
+                    badge.innerText = cuerpo;
+                    badge.style.background = config.color;
+                    document.getElementById('header-color').style.borderTopColor = config.color;
 
-            // 2. Sincronizar Temporizador Global del Admin
-            onValue(ref(db, 'config'), (snap) => {
-                const config = snap.val();
-                if (config && config.proximoExamen) {
-                    actualizarCuentaAtras(config.proximoExamen);
-                    document.getElementById('opo-titulo').innerText = config.tipoOposicion || "Próximo Examen";
-                    document.getElementById('opo-fecha-txt').innerText = `FECHA OFICIAL: ${new Date(config.proximoExamen).toLocaleString('es-ES')}`;
+                    // Sincronizar Temporizador de esa Rama Específica
+                    sincronizarReloj(cuerpo);
                 }
             });
 
-            // 3. Cargar Exámenes
-            onValue(ref(db, `examenes/${id}`), (snap) => {
-                const cont = document.getElementById('tasks-container');
-                cont.innerHTML = "";
-                if(snap.exists()) {
-                    Object.values(snap.val()).forEach(t => {
-                        cont.innerHTML += `
-                            <div style="display:flex; justify-content:space-between; align-items:center; padding:20px; background:rgba(255,255,255,0.03); border-radius:15px; margin-bottom:10px; border: 1px solid var(--border);">
+            // Cargar Exámenes y Notas (Expediente)
+            onValue(ref(db, `examenes/${username}`), (snap) => {
+                const container = document.getElementById('tasks-container');
+                container.innerHTML = "";
+                if(snap.exists()){
+                    Object.values(snap.val()).forEach(ex => {
+                        container.innerHTML += `
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:18px; background:rgba(255,255,255,0.03); border-radius:15px; margin-bottom:12px; border: 1px solid var(--border);">
                                 <div>
-                                    <div style="font-weight:800;">${t.titulo}</div>
-                                    <div style="font-size:0.7rem; color:var(--text-dim); text-transform:uppercase;">${t.dept || 'GENERAL'}</div>
+                                    <div style="font-weight:800; font-size:0.9rem;">${ex.titulo}</div>
+                                    <div style="font-size:0.65rem; color:var(--text-dim); margin-top:4px;">OBS: ${ex.comentario || 'Pendiente de revisión'}</div>
                                 </div>
-                                <div style="display:flex; align-items:center; gap:20px;">
-                                    ${!t.nota ? `<button onclick="abrirExamen('${t.url}')" class="btn" style="background:white; color:black;">Comenzar</button>` : `<div style="font-family:'JetBrains Mono'; font-weight:800; font-size:1.5rem; color:${t.nota >= 5 ? '#10b981' : '#ef4444'}">${t.nota}</div>`}
+                                <div>
+                                    ${ex.nota ? 
+                                        `<div style="font-family:'JetBrains Mono'; font-weight:800; font-size:1.4rem; color:${ex.nota >= 5 ? '#10b981' : '#ef4444'}">${ex.nota}</div>` : 
+                                        `<button onclick="abrirExamen('${ex.url}')" class="btn btn-start">EMPEZAR</button>`
+                                    }
                                 </div>
-                            </div>
-                        `;
+                            </div>`;
                     });
+                } else {
+                    container.innerHTML = `<p style="color:var(--text-dim); font-size:0.8rem;">No tienes exámenes asignados actualmente.</p>`;
+                }
+            });
+
+            // Cargar Avisos Globales
+            onValue(ref(db, 'avisos_globales'), (snap) => {
+                const avisos = snap.val();
+                if(avisos) {
+                    document.getElementById('chat-display').innerHTML = `
+                        <div class="notice-item">
+                            <b style="color:white; display:block; margin-bottom:5px;">AVISO OFICIAL:</b>
+                            ${avisos.text}
+                            <small style="display:block; margin-top:8px; color:var(--text-dim); font-size:0.6rem;">Publicado por: ${avisos.author}</small>
+                        </div>`;
                 }
             });
         }
 
-        function actualizarCuentaAtras(fechaDestino) {
-            const target = new Date(fechaDestino).getTime();
-            
-            const timer = setInterval(() => {
-                const now = new Date().getTime();
-                const diff = target - now;
+        let timerInt;
+        function sincronizarReloj(cuerpo) {
+            onValue(ref(db, `timers/${cuerpo}`), (snap) => {
+                if(timerInt) clearInterval(timerInt);
+                const data = snap.val();
+                if(data && data.target) {
+                    timerInt = setInterval(() => {
+                        const now = new Date().getTime();
+                        const diff = data.target - now;
+                        
+                        if(diff <= 0) {
+                            document.getElementById('timer-display').innerHTML = "EXAMEN EN CURSO";
+                            return;
+                        }
 
-                if (diff <= 0) {
-                    clearInterval(timer);
-                    document.getElementById('timer-display').innerHTML = "EXAMEN EN CURSO";
-                    return;
+                        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+                        document.getElementById('days').innerText = d.toString().padStart(2,'0');
+                        document.getElementById('hours').innerText = h.toString().padStart(2,'0');
+                        document.getElementById('minutes').innerText = m.toString().padStart(2,'0');
+                        document.getElementById('seconds').innerText = s.toString().padStart(2,'0');
+                        document.getElementById('opo-fecha-txt').innerText = "CONEXIÓN ESTABLE CON EL TRIBUNAL";
+                    }, 1000);
                 }
-
-                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-                document.getElementById('days').innerText = d.toString().padStart(2, '0');
-                document.getElementById('hours').innerText = h.toString().padStart(2, '0');
-                document.getElementById('minutes').innerText = m.toString().padStart(2, '0');
-                document.getElementById('seconds').innerText = s.toString().padStart(2, '0');
-            }, 1000);
+            });
         }
 
         window.abrirExamen = (url) => {
+            if(!url) return alert("Error en el enlace del examen.");
             document.getElementById('examen-frame').src = url;
             document.getElementById('modal-examen').style.display = 'flex';
         };
 
         window.cerrarExamen = () => {
-            if(confirm("¿Seguro que deseas salir?")){
+            if(confirm("¿Has terminado el examen? Asegúrate de haber enviado el formulario dentro antes de salir.")){
                 document.getElementById('modal-examen').style.display = 'none';
                 document.getElementById('examen-frame').src = "";
             }
