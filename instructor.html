@@ -237,21 +237,6 @@
                     </div>
                 </div>
 
-                <!-- Calendario Admin -->
-                <div class="card">
-                    <h3>📅 Programar Evento / Oposición</h3>
-                    <div class="grid-form">
-                        <input type="text" id="cal-titulo" placeholder="Título del evento">
-                        <input type="datetime-local" id="cal-fecha">
-                        <select id="cal-cuerpo">
-                            <option value="global">Global (Todos)</option>
-                            <option value="gc">Guardia Civil</option>
-                            <option value="cnp">CNP</option>
-                        </select>
-                        <button class="primary" onclick="añadirEvento()">Añadir al Calendario</button>
-                    </div>
-                </div>
-
                 <!-- Lista de Usuarios -->
                 <div class="card">
                     <h3>📋 Listado Maestro de Usuarios</h3>
@@ -389,7 +374,6 @@
             if(section !== 'admin') document.getElementById('cuerpo-titulo').innerText = "Gestión: " + section.toUpperCase();
         }
 
-        // --- FUNCIONES INSTRUCTORES ---
         function guardarInstructor() {
             const id = document.getElementById('ins-id').value.trim();
             if (!id) return;
@@ -423,7 +407,6 @@
 
         function eliminarInstructor(id) { if(confirm("¿Eliminar?")) db.ref(`instructor/${id}`).remove(); }
 
-        // --- FUNCIONES ALUMNOS ---
         function registrarOpositor() {
             const id = document.getElementById('reg-id').value;
             const nombre = document.getElementById('reg-nombre').value;
@@ -477,13 +460,6 @@
             const url = document.getElementById('ex-url').value;
             if(!id || !ex || !url) return;
             db.ref(`examenes_enviados/${id}`).push({ nombre: ex, url: url, fecha: new Date().toLocaleString() }).then(() => alert("Enviado"));
-        }
-
-        function añadirEvento() {
-            const titulo = document.getElementById('cal-titulo').value;
-            const fecha = document.getElementById('cal-fecha').value;
-            const cuerpo = document.getElementById('cal-cuerpo').value;
-            if(titulo && fecha) db.ref('calendario').push({ titulo, fecha, cuerpo }).then(() => alert("Añadido"));
         }
 
         function copiarID(id) { navigator.clipboard.writeText(id); alert("Copiado"); }
