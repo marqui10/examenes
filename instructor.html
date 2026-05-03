@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Instructor - Oposiciones</title>
     
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (Solo lo necesario) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
     <style>
@@ -18,12 +17,10 @@
             --text-light: #f8fafc;
             --danger: #ef4444;
             --success: #22c55e;
-            --gc-color: #065f46;
-            --cnp-color: #1e40af;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background-color: var(--bg-dark);
             color: var(--text-light);
             margin: 0;
@@ -32,7 +29,7 @@
             overflow: hidden;
         }
 
-        /* Pantalla de Carga/Login */
+        /* Pantalla de Login Limpia */
         #login-screen {
             position: fixed;
             inset: 0;
@@ -44,21 +41,18 @@
             z-index: 1000;
         }
 
-        .btn-discord {
-            background-color: #5865F2;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
+        .login-box {
+            background: var(--sidebar-bg);
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            text-align: center;
+            width: 320px;
         }
 
-        /* Layout Principal */
+        /* Layout */
         #main-container { display: none; width: 100%; height: 100%; }
 
-        /* Sidebar */
         aside {
             width: 260px;
             background-color: var(--sidebar-bg);
@@ -68,44 +62,31 @@
         }
 
         .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid #334155; }
-        
-        .nav-group { padding: 10px; flex-grow: 1; overflow-y: auto; }
-        
         .nav-item {
-            padding: 12px;
-            margin: 4px 0;
-            border-radius: 6px;
+            padding: 12px 20px;
             cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
+            transition: 0.2s;
         }
-
         .nav-item:hover { background: #334155; }
         .nav-item.active { background: var(--accent); }
 
-        /* Contenido */
         main { flex-grow: 1; padding: 30px; overflow-y: auto; }
-
         .card {
             background: #1e293b;
             padding: 20px;
-            border-radius: 12px;
+            border-radius: 10px;
             margin-bottom: 20px;
             border: 1px solid #334155;
         }
 
-        h2 { margin-top: 0; color: var(--accent); border-bottom: 1px solid #334155; padding-bottom: 10px; }
-
-        /* Formularios */
-        .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        
-        input, select, textarea {
+        input, select {
             background: #0f172a;
             border: 1px solid #334155;
             color: white;
             padding: 10px;
-            border-radius: 6px;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         button.primary {
@@ -113,135 +94,74 @@
             color: white;
             border: none;
             padding: 10px 20px;
-            border-radius: 6px;
+            border-radius: 5px;
             cursor: pointer;
+            font-weight: bold;
+            width: 100%;
         }
 
         .hidden { display: none; }
-        
-        /* Calendario Simple */
-        .calendar-placeholder {
-            height: 200px;
-            background: #0f172a;
-            border: 1px dashed #334155;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-        }
     </style>
 </head>
 <body>
 
-    <!-- PANTALLA INICIAL -->
+    <!-- LOGIN POR ID (Único método) -->
     <div id="login-screen">
-        <h1>Academia de Oposiciones</h1>
-        <p>Panel del Instructor</p>
-        <button class="btn-discord" onclick="login()">Iniciar Sesión con Discord</button>
+        <div class="login-box">
+            <h2>Acceso Instructor</h2>
+            <div style="margin-top: 20px;">
+                <input type="password" id="input-id-acceso" placeholder="Introduce tu ID" style="margin-bottom: 15px; text-align: center;">
+                <button class="primary" onclick="loginPorID()">Entrar</button>
+            </div>
+        </div>
     </div>
 
-    <!-- APLICACIÓN PRINCIPAL -->
+    <!-- PANEL PRINCIPAL -->
     <div id="main-container">
         <aside>
             <div class="sidebar-header">
-                <img id="user-avatar" src="" style="width:50px; border-radius:50%; display:none;">
-                <h3 id="user-name">Cargando...</h3>
-                <small id="user-role">Verificando rango...</small>
+                <h3 id="display-nombre">Instructor</h3>
+                <small id="display-rango" style="color: var(--success);"></small>
             </div>
             
-            <nav class="nav-group">
-                <div class="nav-item active" onclick="showSection('admin')">🏠 Panel General (Admin)</div>
-                <hr>
-                <div class="nav-item" onclick="showSection('gc')">🟢 Guardia Civil (GC)</div>
-                <div class="nav-item" onclick="showSection('cnp')">🔵 Policía Nacional (CNP)</div>
-                <div class="nav-item" onclick="showSection('sanitario')">⚪ Sanitarios</div>
-                <div class="nav-item" onclick="showSection('bombero')">🔴 Bomberos</div>
-                <div class="nav-item" onclick="showSection('dgt')">🟡 Tráfico (DGT)</div>
+            <nav style="flex-grow: 1; padding-top: 10px;">
+                <div class="nav-item active" onclick="showSection('admin')">🏠 General (Admin)</div>
+                <div class="nav-item" onclick="showSection('gc')">🟢 Guardia Civil</div>
+                <div class="nav-item" onclick="showSection('cnp')">🔵 CNP</div>
             </nav>
 
-            <div style="padding: 10px;">
-                <button onclick="logout()" style="width:100%; background:var(--danger); color:white; border:none; padding:8px; border-radius:5px; cursor:pointer;">Cerrar Sesión</button>
+            <div style="padding: 20px;">
+                <button onclick="cerrarSesion()" style="background: var(--danger); border: none; color: white; width: 100%; padding: 8px; border-radius: 5px; cursor: pointer;">Salir</button>
             </div>
         </aside>
 
-        <main id="content-area">
-            
-            <!-- SECCIÓN ADMIN -->
-            <section id="sec-admin" class="view">
-                <h2>Panel de Control Global</h2>
-                
+        <main>
+            <section id="sec-admin">
+                <h2>Panel Administrativo</h2>
                 <div class="card">
-                    <h3>📢 Enviar Aviso Global</h3>
-                    <div class="grid-form">
-                        <input type="text" id="aviso-texto" placeholder="Escribe el mensaje para todos los opositores...">
-                        <button class="primary" onclick="enviarAviso()">Enviar y Registrar</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>📅 Calendario de Oposiciones</h3>
-                    <div class="calendar-placeholder">Módulo de Calendario Interactivo</div>
-                </div>
-
-                <div class="card">
-                    <h3>👤 Registro de Nuevo Opositor</h3>
-                    <div class="grid-form">
-                        <input type="text" id="reg-nombre" placeholder="Nombre completo">
-                        <input type="text" id="reg-id" placeholder="Discord ID">
-                        <select id="reg-cuerpo">
-                            <option value="gc">Guardia Civil</option>
-                            <option value="cnp">Policía Nacional</option>
-                            <option value="sanitario">Sanitario</option>
-                            <option value="bombero">Bombero</option>
-                            <option value="dgt">DGT</option>
-                        </select>
-                        <button class="primary" onclick="registrarOpositor()">Dar de Alta</button>
-                    </div>
+                    <h3>Aviso Global</h3>
+                    <input type="text" id="msg-global" placeholder="Escribe un mensaje..." style="margin-bottom: 10px;">
+                    <button class="primary" onclick="enviarAviso()" style="width: auto;">Publicar Aviso</button>
                 </div>
             </section>
 
-            <!-- SECCIÓN CUERPOS (DINÁMICA) -->
-            <section id="sec-cuerpo" class="view hidden">
-                <h2 id="cuerpo-titulo">Gestión de Cuerpo</h2>
-
+            <section id="sec-cuerpo" class="hidden">
+                <h2 id="titulo-cuerpo">Gestión de Alumnos</h2>
                 <div class="card">
-                    <h3>📝 Enviar Nuevo Examen</h3>
-                    <div class="grid-form">
-                        <input type="text" id="ex-user" placeholder="ID Discord del Opositor">
-                        <input type="text" id="ex-nombre" placeholder="Nombre del examen">
-                        <input type="text" id="ex-url" placeholder="URL del examen (Link)">
-                        <button class="primary" onclick="mandarExamen()">Enviar Examen</button>
+                    <h3>Enviar Examen</h3>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <input type="text" id="ex-id" placeholder="ID del Alumno">
+                        <input type="text" id="ex-nom" placeholder="Nombre del Test">
+                        <input type="text" id="ex-url" placeholder="Enlace al Test">
+                        <button class="primary" onclick="mandarExamen()">Enviar</button>
                     </div>
-                </div>
-
-                <div class="card">
-                    <h3>🔍 Expediente del Opositor</h3>
-                    <div class="grid-form">
-                        <input type="text" id="search-user" placeholder="Buscar por ID Discord...">
-                        <button class="primary" onclick="buscarExpediente()">Ver Historial</button>
-                    </div>
-                    
-                    <div id="expediente-resultado" class="hidden" style="margin-top:20px;">
-                        <h4>Notas y Observaciones</h4>
-                        <textarea id="exp-observaciones" style="width:100%; height:80px;" placeholder="Feedback del alumno..."></textarea>
-                        <h4>📓 Notas Privadas (Solo Instructor)</h4>
-                        <textarea id="exp-privado" style="width:100%; height:80px; border-color:var(--danger);"></textarea>
-                        <button class="primary" style="margin-top:10px;">Guardar Cambios</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>⏳ Próxima Convocatoria</h3>
-                    <p>Usuarios en pre-registro:</p>
-                    <div id="lista-proxima">Ninguno por ahora.</div>
                 </div>
             </section>
-
         </main>
     </div>
-<script>
 
-// CONFIGURACIÓN FIREBASE
+    <script>
+        // CONFIGURACIÓN
         const firebaseConfig = {
             apiKey: "AIzaSyBRR_uvjwiyB5b9ugjd0LFgev3a5RvRrrs",
             databaseURL: "https://examenes-profesoralumno-default-rtdb.europe-west1.firebasedatabase.app",
@@ -250,84 +170,63 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 1. FUNCIÓN DE LOGIN POR ID (SIN MEMORIA)
+        // ACCESO (SIN MEMORIA)
         function loginPorID() {
-            const idIntroducida = document.getElementById('input-id-discord').value.trim();
-            if (!idIntroducida) return alert("Introduce una ID válida");
-            
-            // Buscamos directamente en la base de datos
-            db.ref(`instructor/${idIntroducida}`).once('value', snapshot => {
+            const id = document.getElementById('input-id-acceso').value.trim();
+            if (!id) return alert("Introduce una ID");
+
+            db.ref(`instructor/${id}`).once('value', snapshot => {
                 const data = snapshot.val();
                 if (data) {
-                    // Éxito: Entramos pero NO guardamos nada en localStorage
+                    // Cambiar vista
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('main-container').style.display = 'flex';
-                    document.getElementById('user-name-display').innerText = data.nombre || "Instructor";
                     
-                    if(data.admin) {
-                        document.getElementById('user-role').innerText = "ADMINISTRADOR TOTAL";
-                    } else {
-                        document.getElementById('user-role').innerText = "Instructor Autorizado";
-                    }
+                    // Cargar datos
+                    document.getElementById('display-nombre').innerText = data.nombre || "Instructor";
+                    document.getElementById('display-rango').innerText = data.admin ? "ADMINISTRADOR" : "INSTRUCTOR";
                 } else {
-                    alert("ID no encontrada en la base de datos.");
+                    alert("ID no válida o sin permisos.");
                 }
             });
         }
 
-        // 2. LOGOUT (Simplemente recarga para limpiar el estado actual)
-        function logout() {
+        function cerrarSesion() {
+            // Al no haber memoria, simplemente recargamos
             location.reload();
         }
 
-        // NAVEGACIÓN
-        function showSection(section) {
-            const adminSec = document.getElementById('sec-admin');
-            const cuerpoSec = document.getElementById('sec-cuerpo');
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-
-            if (section === 'admin') {
-                adminSec.classList.remove('hidden');
-                cuerpoSec.classList.add('hidden');
+        function showSection(tipo) {
+            const admin = document.getElementById('sec-admin');
+            const cuerpo = document.getElementById('sec-cuerpo');
+            
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            
+            if (tipo === 'admin') {
+                admin.classList.remove('hidden');
+                cuerpo.classList.add('hidden');
             } else {
-                adminSec.classList.add('hidden');
-                cuerpoSec.classList.remove('hidden');
-                document.getElementById('cuerpo-titulo').innerText = "Gestión: " + section.toUpperCase();
+                admin.classList.add('hidden');
+                cuerpo.classList.remove('hidden');
+                document.getElementById('titulo-cuerpo').innerText = "Gestión: " + tipo.toUpperCase();
             }
         }
 
-        // FUNCIONES DE BASE DE DATOS
         function enviarAviso() {
-            const txt = document.getElementById('aviso-texto').value;
+            const m = document.getElementById('msg-global').value;
             db.ref('avisos/actual').set({
-                mensaje: txt,
-                fecha: new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' })
+                mensaje: m,
+                hora: new Date().toLocaleTimeString('es-ES')
             }).then(() => alert("Aviso enviado"));
         }
 
-        function registrarOpositor() {
-            const id = document.getElementById('reg-id').value;
-            const cuerpo = document.getElementById('reg-cuerpo').value;
-            const nombre = document.getElementById('reg-nombre').value;
-            db.ref(`instructor/${id}/${cuerpo}`).set({
-                nombre: nombre,
-                activo: true
-            }).then(() => alert("Opositor registrado"));
-        }
-
         function mandarExamen() {
-            const opositor = document.getElementById('ex-user').value;
-            const nombre = document.getElementById('ex-nombre').value;
-            const url = document.getElementById('ex-url').value;
-            db.ref(`examenes_enviados/${opositor}`).push({
-                nombre: nombre,
-                url: url,
-                fecha: new Date().toISOString()
+            const alum = document.getElementById('ex-id').value;
+            db.ref(`examenes_enviados/${alum}`).push({
+                nombre: document.getElementById('ex-nom').value,
+                link: document.getElementById('ex-url').value,
+                fecha: new Date().toLocaleDateString('es-ES')
             }).then(() => alert("Examen enviado"));
-        }
-
-        function buscarExpediente() {
-            document.getElementById('expediente-resultado').classList.remove('hidden');
         }
     </script>
 </body>
