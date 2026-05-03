@@ -257,10 +257,22 @@
         const db = firebase.database();
 
         // AUTH CON DISCORD
-        function login() {
-            const provider = new firebase.auth.OAuthProvider('discord.com');
-            auth.signInWithPopup(provider).catch(err => alert("Error: " + err.message));
+   function loginPorID() {
+    const idIntroducida = document.getElementById('input-id-discord').value;
+
+    // Buscamos directamente en la base de datos sin pasar por Auth de Google
+    db.ref(`instructor/${idIntroducida}`).once('value', snapshot => {
+        const data = snapshot.val();
+        
+        if (data) {
+            // ¡Éxito! Guardamos el ID en la sesión del navegador (Local Storage)
+            localStorage.setItem('user_discord_id', idIntroducida);
+            entrarAlPanel(data);
+        } else {
+            alert("Tu ID no está registrada en la base de datos.");
         }
+    });
+}
 
         function logout() {
             auth.signOut().then(() => location.reload());
