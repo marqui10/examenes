@@ -77,12 +77,13 @@
             border-radius: 6px;
             cursor: pointer;
             transition: 0.3s;
-            display: flex;
+            display: none; /* Cambiado a none para control de permisos */
             align-items: center;
             font-size: 0.9rem;
         }
         .nav-item:hover { background: #334155; }
-        .nav-item.active { background: var(--accent); }
+        .nav-item.active { background: var(--accent); display: flex; }
+        .nav-item.visible { display: flex; }
 
         main { flex-grow: 1; padding: 30px; overflow-y: auto; }
 
@@ -141,7 +142,7 @@
         .bg-gc { background: #064e3b; }
         .bg-cnp { background: #1e3a8a; }
 
-        .hidden { display: none; }
+        .hidden { display: none !important; }
 
         .search-box {
             position: relative;
@@ -176,13 +177,13 @@
             </div>
             
             <nav class="nav-group">
-                <div class="nav-item active" onclick="showSection('admin', this)">🏠 Panel Admin / Global</div>
-                <hr style="border: 0; border-top: 1px solid #334155; margin: 10px 0;">
-                <div class="nav-item" onclick="showSection('gc', this)">🟢 Guardia Civil (GC)</div>
-                <div class="nav-item" onclick="showSection('cnp', this)">🔵 Policía Nacional (CNP)</div>
-                <div class="nav-item" onclick="showSection('sanitario', this)">⚪ Sanitarios</div>
-                <div class="nav-item" onclick="showSection('bombero', this)">🔴 Bomberos</div>
-                <div class="nav-item" onclick="showSection('dgt', this)">🟡 Tráfico (DGT)</div>
+                <div class="nav-item" id="nav-admin" onclick="showSection('admin', this)">🏠 Panel Admin / Global</div>
+                <hr id="nav-divider" class="hidden" style="border: 0; border-top: 1px solid #334155; margin: 10px 0;">
+                <div class="nav-item" id="nav-gc" onclick="showSection('gc', this)">🟢 Guardia Civil (GC)</div>
+                <div class="nav-item" id="nav-cnp" onclick="showSection('cnp', this)">🔵 Policía Nacional (CNP)</div>
+                <div class="nav-item" id="nav-sanitario" onclick="showSection('sanitario', this)">⚪ Sanitarios</div>
+                <div class="nav-item" id="nav-bombero" onclick="showSection('bombero', this)">🔴 Bomberos</div>
+                <div class="nav-item" id="nav-dgt" onclick="showSection('dgt', this)">🟡 Tráfico (DGT)</div>
             </nav>
 
             <div style="padding: 20px;">
@@ -192,7 +193,7 @@
 
         <main id="content">
             <!-- SECCIÓN ADMIN -->
-            <section id="sec-admin">
+            <section id="sec-admin" class="hidden">
                 <h2>Panel de Control Global</h2>
                 
                 <!-- Registro Opositor -->
@@ -337,16 +338,50 @@
                 
                 db.ref(`instructor/${user.id}`).once('value', snap => {
                     if(snap.exists()){
+                        const perms = snap.val();
                         document.getElementById('login-screen').style.display = 'none';
                         document.getElementById('main-container').style.display = 'flex';
                         document.getElementById('user-name').innerText = user.username;
                         document.getElementById('welcome-msg').innerText = `ID: ${user.id}`;
                         if(user.avatar) document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+                        
+                        setupPermissions(perms);
                         cargarListaMaestra();
                     } else {
                         alert("No eres instructor autorizado.");
                     }
                 });
+            }
+        }
+
+        function setupPermissions(p) {
+            const items = {
+                admin: { nav: document.getElementById('nav-admin'), sec: 'admin' },
+                gc: { nav: document.getElementById('nav-gc'), sec: 'gc' },
+                cnp: { nav: document.getElementById('nav-cnp'), sec: 'cnp' },
+                sanitario: { nav: document.getElementById('nav-sanitario'), sec: 'sanitario' },
+                bombero: { nav: document.getElementById('nav-bombero'), sec: 'bombero' },
+                dgt: { nav: document.getElementById('nav-dgt'), sec: 'dgt' }
+            };
+
+            if (p.admin === true) {
+                Object.values(items).forEach(item => item.nav.classList.add('visible'));
+                document.getElementById('nav-divider').classList.remove('hidden');
+                showSection('admin', items.admin.nav);
+            } else {
+                let firstMatch = null;
+                Object.keys(items).forEach(key => {
+                    if (p[key] === true) {
+                        items[key].nav.classList.add('visible');
+                        if (!firstMatch) firstMatch = key;
+                    }
+                });
+
+                if (firstMatch) {
+                    showSection(firstMatch, items[firstMatch].nav);
+                } else {
+                    alert("No tienes departamentos asignados.");
+                }
             }
         }
 
